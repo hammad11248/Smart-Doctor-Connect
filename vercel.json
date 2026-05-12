@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "api/main.py", "use": "@vercel/python" }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "api/main.py" }
+  ],
+  "env": {
+    "MONGODB_URI": "@mongodb_uri",
+    "OPENROUTER_API_KEY": "@openrouter_api_key",
+    "SECRET_KEY": "@secret_key"
+  }
+}

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Doctor Profile — Smart Doctor Connect AI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .input-field{width:100%;border:1px solid #e2e8f0;border-radius:0.5rem;padding:0.6rem 0.85rem;font-size:0.875rem;outline:none;color:#1e293b;transition:border-color 0.15s}
+    .input-field:focus{border-color:#0ea5e9}
+    #toast{transition:opacity 0.3s,transform 0.3s}
+    #toast.hidden{opacity:0;transform:translateY(20px);pointer-events:none}
+    .chat-bubble{max-width:80%;padding:0.6rem 1rem;border-radius:1rem;font-size:0.875rem;line-height:1.4}
+    .chat-patient{background:#e0f2fe;color:#0c4a6e;border-bottom-left-radius:0.25rem;align-self:flex-start}
+    .chat-ai{background:#f0fdf4;color:#14532d;border-bottom-right-radius:0.25rem;align-self:flex-end}
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
+
+<header class="bg-white shadow-sm sticky top-0 z-40">
+  <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2">
+      <span class="text-2xl">🏥</span>
+      <span class="font-bold text-lg text-sky-700">Smart Doctor<span class="text-slate-500 font-normal"> Connect</span></span>
+    </a>
+    <nav class="flex gap-4 items-center text-sm">
+      <a href="/index.html" class="text-slate-500 hover:text-sky-600">Find Doctor</a>
+      <a href="/doctor-dashboard.html" class="text-slate-500 hover:text-sky-600">For Doctors</a>
+    </nav>
+  </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-4 py-8">
+  <!-- Doctor Profile Card -->
+  <div id="profileCard" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 mb-6">
+    <div class="flex items-start gap-4">
+      <div class="w-16 h-16 rounded-full bg-sky-100 flex items-center justify-center text-3xl shrink-0">👨‍⚕️</div>
+      <div class="flex-1">
+        <h1 id="profileName" class="text-xl font-bold text-slate-800">Loading...</h1>
+        <p id="profileSpec" class="text-sky-600 font-medium text-sm"></p>
+        <div class="flex flex-wrap gap-3 mt-2 text-xs text-slate-500">
+          <span id="profileLocation"></span>
+          <span id="profileType"></span>
+          <span id="profileFee"></span>
+          <span id="profileExp"></span>
+        </div>
+        <p id="profileBio" class="text-sm text-slate-600 mt-3"></p>
+        <div class="flex items-center gap-2 mt-2">
+          <span id="profileRating" class="text-yellow-400 text-sm"></span>
+          <span id="profileReviews" class="text-xs text-slate-400"></span>
+          <span id="profileAvailBadge" class="text-xs font-semibold px-2 py-0.5 rounded-full ml-2"></span>
+        </div>
+      </div>
+    </div>
+    <!-- Availability Schedule -->
+    <div class="mt-6">
+      <h3 class="text-sm font-bold text-slate-700 mb-2">📅 Availability</h3>
+      <div id="availSchedule" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 text-xs"></div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Chat Section -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+      <h2 class="text-lg font-bold text-slate-800 mb-3">💬 AI Receptionist Chat</h2>
+      <p class="text-xs text-slate-400 mb-3">Send a message — our AI will respond on behalf of the doctor if they're offline.</p>
+      <div id="chatMessages" class="flex flex-col gap-2 max-h-72 overflow-y-auto mb-3 p-2 bg-slate-50 rounded-xl"></div>
+      <div class="space-y-2">
+        <input id="chatName" type="text" placeholder="Your name *" class="input-field" />
+        <input id="chatContact" type="tel" placeholder="Phone (optional)" class="input-field" />
+        <div class="flex gap-2">
+          <input id="chatMessage" type="text" placeholder="Type your message..." class="input-field flex-1" />
+          <button onclick="sendMessage()" class="bg-sky-600 hover:bg-sky-700 text-white font-semibold px-4 py-2 rounded-xl text-sm transition-colors">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Book Section -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+      <h2 class="text-lg font-bold text-slate-800 mb-3">📅 Quick Book</h2>
+      <div class="space-y-3">
+        <input id="qbName" type="text" placeholder="Your name *" class="input-field" />
+        <input id="qbContact" type="tel" placeholder="Phone +92 300 1234567 *" class="input-field" />
+        <input id="qbEmail" type="email" placeholder="Email *" class="input-field" />
+        <input id="qbDate" type="date" class="input-field" />
+        <select id="qbSlot" class="input-field"><option value="">Select slot...</option></select>
+        <select id="qbType" class="input-field"><option value="online">Online</option><option value="in_person">In-Person</option></select>
+        <textarea id="qbSymptoms" placeholder="Symptoms (optional)" class="input-field resize-none h-16"></textarea>
+        <button onclick="quickBook()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 rounded-xl text-sm transition-colors">Book Appointment</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-800 text-white text-sm px-5 py-3 rounded-full shadow-lg"></div>
+
+<script>
+const API_BASE="/api";
+const params=new URLSearchParams(window.location.search);
+const doctorId=params.get("id");
+let doctorData=null;
+
+async function loadProfile(){
+  if(!doctorId){document.getElementById("profileName").textContent="No doctor ID provided.";return}
+  try{
+    const r=await fetch(`${API_BASE}/doctors/${doctorId}`);if(!r.ok)throw new Error();
+    doctorData=await r.json();
+    document.title=`${doctorData.name} — Smart Doctor Connect AI`;
+    document.getElementById("profileName").textContent=doctorData.name;
+    document.getElementById("profileSpec").textContent=doctorData.specialization;
+    document.getElementById("profileLocation").textContent="📍 "+doctorData.location;
+    document.getElementById("profileType").textContent="🏥 "+doctorData.consultation_type;
+    document.getElementById("profileFee").textContent="💰 Rs. "+(doctorData.consultation_fee?.toLocaleString()??"—");
+    document.getElementById("profileExp").textContent="🎓 "+doctorData.experience_years+" yrs";
+    document.getElementById("profileBio").textContent=doctorData.bio||"";
+    const stars="★".repeat(Math.round(doctorData.rating||0))+"☆".repeat(5-Math.round(doctorData.rating||0));
+    document.getElementById("profileRating").textContent=stars;
+    document.getElementById("profileReviews").textContent=`${doctorData.rating?.toFixed(1)} (${doctorData.total_reviews} reviews)`;
+    const badge=document.getElementById("profileAvailBadge");
+    badge.textContent=doctorData.is_available?"Available":"Unavailable";
+    badge.className=`text-xs font-semibold px-2 py-0.5 rounded-full ml-2 ${doctorData.is_available?"bg-green-100 text-green-700":"bg-red-100 text-red-600"}`;
+    renderSchedule(doctorData.availability||{});
+    setupBookingDate();
+    loadChatHistory();
+  }catch{document.getElementById("profileName").textContent="Doctor not found."}
+}
+
+function renderSchedule(avail){
+  const c=document.getElementById("availSchedule");c.innerHTML="";
+  const days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+  days.forEach(day=>{
+    const slots=avail[day];
+    if(!slots||!slots.length)return;
+    const div=document.createElement("div");
+    div.className="bg-slate-50 rounded-lg p-2";
+    div.innerHTML=`<p class="font-semibold text-slate-700 mb-1">${day}</p>${slots.map(s=>`<span class="inline-block bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded mr-1 mb-1">${s}</span>`).join("")}`;
+    c.appendChild(div);
+  });
+  if(!c.children.length)c.innerHTML='<p class="text-slate-400 col-span-full">No availability set.</p>';
+}
+
+function setupBookingDate(){
+  const today=new Date().toISOString().split("T")[0];
+  const d=document.getElementById("qbDate");d.min=today;d.value=today;
+  d.onchange=()=>updateSlots(d.value);
+  updateSlots(today);
+}
+
+function updateSlots(dateStr){
+  const day=new Date(dateStr+"T00:00:00").toLocaleDateString("en-US",{weekday:"long"});
+  const slots=(doctorData?.availability||{})[day]||[];
+  const sel=document.getElementById("qbSlot");
+  sel.innerHTML=slots.length?slots.map(s=>`<option value="${s}">${s}</option>`).join(""):`<option value="">No slots for ${day}</option>`;
+}
+
+async function quickBook(){
+  const name=document.getElementById("qbName").value.trim();
+  const contact=document.getElementById("qbContact").value.trim();
+  const email=document.getElementById("qbEmail").value.trim();
+  const date=document.getElementById("qbDate").value;
+  const slot=document.getElementById("qbSlot").value;
+  const type=document.getElementById("qbType").value;
+  const symptoms=document.getElementById("qbSymptoms").value.trim();
+  if(!name||!contact||!email||!date||!slot){showToast("Fill all required fields.");return}
+  try{
+    const r=await fetch(`${API_BASE}/appointments/`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({doctor_id:doctorId,doctor_name:doctorData?.name||"",patient_name:name,patient_contact:contact,patient_email:email,date,time_slot:slot,consultation_type:type,symptoms})});
+    if(r.status===409){showToast("⚠️ Slot already booked.");return}
+    if(!r.ok)throw new Error();
+    showToast("✅ Appointment booked!");
+  }catch{showToast("Booking failed.")}
+}
+
+async function sendMessage(){
+  const name=document.getElementById("chatName").value.trim();
+  const contact=document.getElementById("chatContact").value.trim();
+  const msg=document.getElementById("chatMessage").value.trim();
+  if(!name||!msg){showToast("Name and message required.");return}
+  addChatBubble(msg,"patient",name);
+  document.getElementById("chatMessage").value="";
+  try{
+    const r=await fetch(`${API_BASE}/chat/message`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({doctor_id:doctorId,patient_name:name,patient_contact:contact||null,message:msg})});
+    if(!r.ok)throw new Error();
+    const data=await r.json();
+    addChatBubble(data.ai_response,"ai","AI Receptionist");
+  }catch{addChatBubble("Sorry, something went wrong. Please try again.","ai","System")}
+}
+
+async function loadChatHistory(){
+  try{
+    const r=await fetch(`${API_BASE}/chat/history/${doctorId}?limit=20`);if(!r.ok)return;
+    const msgs=await r.json();
+    msgs.forEach(m=>{addChatBubble(m.message,"patient",m.patient_name);addChatBubble(m.ai_response,"ai","AI Receptionist")});
+  }catch{}
+}
+
+function addChatBubble(text,type,sender){
+  const c=document.getElementById("chatMessages");
+  const div=document.createElement("div");
+  div.className=`chat-bubble ${type==="patient"?"chat-patient":"chat-ai"}`;
+  div.innerHTML=`<p class="text-xs font-semibold opacity-60 mb-0.5">${esc(sender)}</p><p>${esc(text)}</p>`;
+  c.appendChild(div);c.scrollTop=c.scrollHeight;
+}
+
+function showToast(m,d=3500){const t=document.getElementById("toast");t.textContent=m;t.classList.remove("hidden");setTimeout(()=>t.classList.add("hidden"),d)}
+function esc(s){return String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+
+document.getElementById("chatMessage").addEventListener("keydown",e=>{if(e.key==="Enter")sendMessage()});
+loadProfile();
+</script>
+</body>
+</html>

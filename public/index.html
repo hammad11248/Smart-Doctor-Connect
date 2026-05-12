@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Doctor Connect AI — Pakistan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom Tailwind config inline */
+    :root {
+      --brand: #0ea5e9;       /* sky-500 */
+      --brand-dark: #0369a1;  /* sky-700 */
+    }
+
+    /* Progress bar fill animation */
+    @keyframes growBar {
+      from { width: 0; }
+    }
+    .score-bar { animation: growBar 0.6s ease-out forwards; }
+
+    /* Card hover lift */
+    .doctor-card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .doctor-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+    }
+
+    /* Skeleton shimmer */
+    @keyframes shimmer {
+      0%   { background-position: -400px 0; }
+      100% { background-position: 400px 0; }
+    }
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 800px 100%;
+      animation: shimmer 1.4s infinite linear;
+      border-radius: 6px;
+    }
+
+    /* Toast */
+    #toast {
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    #toast.hidden { opacity: 0; transform: translateY(20px); pointer-events: none; }
+  </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
+
+<!-- ── TOP NAV ──────────────────────────────────────────────────────────────── -->
+<header class="bg-white shadow-sm sticky top-0 z-40">
+  <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2">
+      <span class="text-2xl">🏥</span>
+      <span class="font-bold text-lg text-sky-700 leading-tight">
+        Smart Doctor<br class="sm:hidden"><span class="text-slate-500 font-normal"> Connect</span>
+      </span>
+    </a>
+    <nav class="flex gap-4 items-center text-sm">
+      <a href="/index.html"            class="text-sky-600 font-medium">Find Doctor</a>
+      <a href="/doctor-dashboard.html" class="text-slate-500 hover:text-sky-600">For Doctors</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ── HERO ──────────────────────────────────────────────────────────────────── -->
+<section class="bg-gradient-to-br from-sky-700 via-sky-600 to-cyan-500 text-white py-14 px-4">
+  <div class="max-w-3xl mx-auto text-center">
+    <h1 class="text-3xl sm:text-4xl font-extrabold mb-3 leading-tight">
+      Find the Right Doctor — Instantly
+    </h1>
+    <p class="text-sky-100 mb-8 text-base sm:text-lg">
+      Describe your symptoms in plain language. Our AI maps them to the right specialist, anywhere in Pakistan.
+    </p>
+
+    <!-- Search Bar -->
+    <div class="relative flex items-center bg-white rounded-2xl shadow-xl overflow-hidden">
+      <span class="pl-4 text-2xl select-none">🔍</span>
+      <input
+        id="searchInput"
+        type="text"
+        placeholder="e.g. my child has fever and cough in Lahore…"
+        class="flex-1 px-4 py-4 text-slate-700 text-base outline-none bg-transparent"
+        autocomplete="off"
+        aria-label="Describe your symptoms"
+      />
+      <button
+        id="searchBtn"
+        onclick="handleSearch()"
+        class="bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white font-semibold
+               px-6 py-4 transition-colors text-sm sm:text-base whitespace-nowrap"
+      >
+        Search
+      </button>
+    </div>
+
+    <!-- Quick Suggestion Pills -->
+    <div class="mt-4 flex flex-wrap justify-center gap-2 text-sm" id="suggestionPills">
+      <button onclick="fillSearch('back pain Islamabad')"  class="pill">Back Pain</button>
+      <button onclick="fillSearch('diabetes checkup Lahore')" class="pill">Diabetes</button>
+      <button onclick="fillSearch('child fever cough Karachi')" class="pill">Child Fever</button>
+      <button onclick="fillSearch('heart palpitations Rawalpindi')" class="pill">Heart Issues</button>
+      <button onclick="fillSearch('skin rash Faisalabad')" class="pill">Skin Problems</button>
+      <button onclick="fillSearch('anxiety depression')" class="pill">Mental Health</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── AI ANALYSIS BANNER ─────────────────────────────────────────────────── -->
+<div id="analysisBanner" class="hidden max-w-6xl mx-auto px-4 mt-6">
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex flex-col sm:flex-row gap-4">
+    <div class="flex-1">
+      <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1">AI Recommendation</p>
+      <p class="text-slate-700 text-sm" id="bannerAdvice">—</p>
+    </div>
+    <div class="flex gap-4 sm:gap-6 shrink-0 text-center">
+      <div>
+        <p class="text-xs text-slate-400 mb-1">Urgency</p>
+        <span id="bannerUrgency"
+          class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">—</span>
+      </div>
+      <div>
+        <p class="text-xs text-slate-400 mb-1">Specialist</p>
+        <p class="text-sm font-semibold text-sky-700" id="bannerSpec">—</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── RESULTS AREA ───────────────────────────────────────────────────────── -->
+<main class="max-w-6xl mx-auto px-4 py-8">
+  <div class="flex items-center justify-between mb-4">
+    <h2 id="resultsHeading" class="text-lg font-bold text-slate-700 hidden">
+      Matching Doctors
+    </h2>
+    <span id="resultCount" class="text-sm text-slate-400"></span>
+  </div>
+
+  <!-- Skeleton loader -->
+  <div id="skeletonGrid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div class="skeleton h-52 w-full"></div>
+    <div class="skeleton h-52 w-full"></div>
+    <div class="skeleton h-52 w-full"></div>
+  </div>
+
+  <!-- Doctor Cards -->
+  <div id="doctorGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    <!-- Injected by JS -->
+  </div>
+
+  <!-- Empty / Error states -->
+  <div id="emptyState" class="hidden text-center py-20 text-slate-400">
+    <p class="text-5xl mb-3">🩺</p>
+    <p class="text-lg font-semibold">No doctors found</p>
+    <p class="text-sm mt-1">Try different symptoms or remove location details.</p>
+  </div>
+</main>
+
+<!-- ── BOOKING MODAL ──────────────────────────────────────────────────────── -->
+<div id="bookingModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative">
+    <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-2xl leading-none">&times;</button>
+    <h3 class="text-lg font-bold text-slate-800 mb-1">Book Appointment</h3>
+    <p class="text-sm text-slate-500 mb-4" id="modalDoctorName">—</p>
+
+    <div class="space-y-3">
+      <input id="bookPatientName"    type="text"  placeholder="Your full name *"
+        class="input-field" />
+      <input id="bookPatientContact" type="tel"   placeholder="Phone  +92 300 1234567 *"
+        class="input-field" />
+      <input id="bookPatientEmail"   type="email" placeholder="Email address *"
+        class="input-field" />
+      <input id="bookDate"           type="date"
+        class="input-field" />
+      <select id="bookTimeSlot" class="input-field text-slate-500">
+        <option value="">Select time slot…</option>
+      </select>
+      <select id="bookConsultType" class="input-field">
+        <option value="online">Online Consultation</option>
+        <option value="in_person">In-Person Visit</option>
+      </select>
+      <textarea id="bookSymptoms" placeholder="Briefly describe your symptoms (optional)"
+        class="input-field resize-none h-20"></textarea>
+    </div>
+
+    <button onclick="submitBooking()"
+      class="mt-5 w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold
+             py-3 rounded-xl transition-colors text-sm">
+      Confirm Appointment
+    </button>
+  </div>
+</div>
+
+<!-- ── TOAST ─────────────────────────────────────────────────────────────── -->
+<div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50
+     bg-slate-800 text-white text-sm px-5 py-3 rounded-full shadow-lg">
+</div>
+
+<!-- ── PILL + INPUT STYLES ────────────────────────────────────────────────── -->
+<style>
+  .pill {
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.4);
+    color: white;
+    padding: 0.3rem 0.9rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .pill:hover { background: rgba(255,255,255,0.3); }
+  .input-field {
+    width: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 0.6rem 0.85rem;
+    font-size: 0.875rem;
+    outline: none;
+    color: #1e293b;
+    transition: border-color 0.15s;
+  }
+  .input-field:focus { border-color: #0ea5e9; }
+</style>
+
+<!-- ── JAVASCRIPT ─────────────────────────────────────────────────────────── -->
+<script>
+  const API_BASE = "/api";
+
+  // Debounce state
+  let debounceTimer = null;
+  let activeDoctorId = null;
+  let activeDoctorSlots = {};
+
+  // ── Search input: fire on Enter ─────────────────────────────────────────
+  document.getElementById("searchInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") handleSearch();
+  });
+
+  function fillSearch(text) {
+    document.getElementById("searchInput").value = text;
+    handleSearch();
+  }
+
+  // ── Main Search Handler ─────────────────────────────────────────────────
+  async function handleSearch() {
+    const q = document.getElementById("searchInput").value.trim();
+    if (q.length < 3) { showToast("Please describe your symptoms (at least 3 characters)."); return; }
+
+    showSkeleton(true);
+    hideAnalysisBanner();
+
+    try {
+      const resp = await fetch(`${API_BASE}/doctors/search?q=${encodeURIComponent(q)}&limit=6`);
+      if (!resp.ok) throw new Error(`Server error ${resp.status}`);
+      const data = await resp.json();
+      renderResults(data);
+    } catch (err) {
+      showToast("Search failed. Please try again.");
+      console.error(err);
+    } finally {
+      showSkeleton(false);
+    }
+  }
+
+  // ── Render Results ──────────────────────────────────────────────────────
+  function renderResults(data) {
+    const grid = document.getElementById("doctorGrid");
+    const empty = document.getElementById("emptyState");
+    const heading = document.getElementById("resultsHeading");
+    const count = document.getElementById("resultCount");
+
+    grid.innerHTML = "";
+
+    // Analysis banner
+    if (data.specializations?.length) {
+      showAnalysisBanner(data);
+    }
+
+    if (!data.doctors?.length) {
+      empty.classList.remove("hidden");
+      heading.classList.add("hidden");
+      count.textContent = "";
+      return;
+    }
+
+    empty.classList.add("hidden");
+    heading.classList.remove("hidden");
+    count.textContent = `${data.doctors.length} result${data.doctors.length !== 1 ? "s" : ""}`;
+
+    data.doctors.forEach(doc => {
+      grid.insertAdjacentHTML("beforeend", buildCard(doc));
+    });
+  }
+
+  // ── Build a single Doctor Card ──────────────────────────────────────────
+  function buildCard(doc) {
+    const score = doc.match_score ?? 0;
+    const scoreColor = score >= 70 ? "bg-green-500" : score >= 40 ? "bg-yellow-400" : "bg-slate-300";
+    const availBadge = doc.is_available
+      ? `<span class="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">Available</span>`
+      : `<span class="bg-red-100 text-red-600 text-xs font-semibold px-2 py-0.5 rounded-full">Unavailable</span>`;
+
+    const stars = "★".repeat(Math.round(doc.rating || 0)) + "☆".repeat(5 - Math.round(doc.rating || 0));
+
+    return `
+      <div class="doctor-card bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col gap-3">
+        <!-- Header -->
+        <div class="flex items-start justify-between gap-2">
+          <div class="w-12 h-12 rounded-full bg-sky-100 flex items-center justify-center text-2xl shrink-0">
+            👨‍⚕️
+          </div>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-bold text-slate-800 truncate text-sm sm:text-base">${esc(doc.name)}</h3>
+            <p class="text-sky-600 text-xs font-medium">${esc(doc.specialization)}</p>
+          </div>
+          ${availBadge}
+        </div>
+
+        <!-- Details -->
+        <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+          <span>📍 ${esc(doc.location)}</span>
+          <span>🏥 ${esc(doc.consultation_type)}</span>
+          <span>💰 Rs. ${doc.consultation_fee?.toLocaleString() ?? "—"}</span>
+          <span>🎓 ${doc.experience_years} yrs exp.</span>
+        </div>
+
+        <!-- Rating -->
+        <div class="flex items-center gap-2 text-xs">
+          <span class="text-yellow-400 tracking-tight">${stars}</span>
+          <span class="text-slate-500">${doc.rating?.toFixed(1) ?? "N/A"} (${doc.total_reviews} reviews)</span>
+        </div>
+
+        <!-- Match Score Bar -->
+        <div>
+          <div class="flex justify-between text-xs text-slate-400 mb-1">
+            <span>AI Match</span><span class="font-semibold text-slate-600">${score}%</span>
+          </div>
+          <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div class="score-bar h-full ${scoreColor} rounded-full" style="width:${score}%"></div>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <button
+          onclick="openBooking('${esc(doc._id || doc.id)}', '${esc(doc.name)}', ${JSON.stringify(doc.availability || {})})"
+          class="mt-auto bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold
+                 py-2.5 rounded-xl transition-colors ${doc.is_available ? "" : "opacity-50 cursor-not-allowed"}"
+          ${doc.is_available ? "" : "disabled"}
+        >
+          Book Appointment
+        </button>
+      </div>
+    `;
+  }
+
+  // ── Analysis Banner ─────────────────────────────────────────────────────
+  function showAnalysisBanner(data) {
+    const urgencyColors = {
+      EMERGENCY: "bg-red-100 text-red-700",
+      HIGH: "bg-orange-100 text-orange-700",
+      MEDIUM: "bg-yellow-100 text-yellow-700",
+      LOW: "bg-green-100 text-green-700",
+    };
+    const banner = document.getElementById("analysisBanner");
+    document.getElementById("bannerAdvice").textContent = data.home_advice || "—";
+    document.getElementById("bannerSpec").textContent = data.specializations?.join(", ") || "—";
+    const urgencyEl = document.getElementById("bannerUrgency");
+    urgencyEl.textContent = data.urgency || "—";
+    urgencyEl.className = `px-3 py-1 rounded-full text-xs font-bold ${urgencyColors[data.urgency] || "bg-slate-100 text-slate-600"}`;
+    banner.classList.remove("hidden");
+  }
+  function hideAnalysisBanner() {
+    document.getElementById("analysisBanner").classList.add("hidden");
+  }
+
+  // ── Booking Modal ───────────────────────────────────────────────────────
+  function openBooking(doctorId, doctorName, availability) {
+    activeDoctorId = doctorId;
+    activeDoctorSlots = availability;
+    document.getElementById("modalDoctorName").textContent = `with ${doctorName}`;
+
+    // Set min date to today
+    const today = new Date().toISOString().split("T")[0];
+    const dateInput = document.getElementById("bookDate");
+    dateInput.min = today;
+    dateInput.value = today;
+    updateTimeSlots(today);
+    dateInput.onchange = () => updateTimeSlots(dateInput.value);
+
+    document.getElementById("bookingModal").classList.remove("hidden");
+    document.getElementById("bookPatientName").focus();
+  }
+
+  function updateTimeSlots(dateStr) {
+    const day = new Date(dateStr + "T00:00:00").toLocaleDateString("en-US", { weekday: "long" });
+    const slots = activeDoctorSlots[day] || [];
+    const sel = document.getElementById("bookTimeSlot");
+    sel.innerHTML = slots.length
+      ? slots.map(s => `<option value="${s}">${s}</option>`).join("")
+      : `<option value="">No slots available for ${day}</option>`;
+  }
+
+  function closeModal() {
+    document.getElementById("bookingModal").classList.add("hidden");
+    activeDoctorId = null;
+  }
+
+  // Close modal on backdrop click
+  document.getElementById("bookingModal").addEventListener("click", e => {
+    if (e.target === document.getElementById("bookingModal")) closeModal();
+  });
+
+  async function submitBooking() {
+    const name    = document.getElementById("bookPatientName").value.trim();
+    const contact = document.getElementById("bookPatientContact").value.trim();
+    const email   = document.getElementById("bookPatientEmail").value.trim();
+    const date    = document.getElementById("bookDate").value;
+    const slot    = document.getElementById("bookTimeSlot").value;
+    const ctype   = document.getElementById("bookConsultType").value;
+    const symptoms = document.getElementById("bookSymptoms").value.trim();
+    const docName = document.getElementById("modalDoctorName").textContent.replace("with ", "");
+
+    if (!name || !contact || !email || !date || !slot) {
+      showToast("Please fill in all required fields."); return;
+    }
+
+    try {
+      const resp = await fetch(`${API_BASE}/appointments/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          doctor_id: activeDoctorId,
+          doctor_name: docName,
+          patient_name: name,
+          patient_contact: contact,
+          patient_email: email,
+          date, time_slot: slot,
+          consultation_type: ctype,
+          symptoms,
+        }),
+      });
+
+      if (resp.status === 409) {
+        showToast("⚠️ That slot is already booked. Please choose another."); return;
+      }
+      if (!resp.ok) throw new Error();
+
+      closeModal();
+      showToast("✅ Appointment booked! Check your email for confirmation.");
+    } catch {
+      showToast("Booking failed. Please try again.");
+    }
+  }
+
+  // ── Skeleton ────────────────────────────────────────────────────────────
+  function showSkeleton(visible) {
+    document.getElementById("skeletonGrid").classList.toggle("hidden", !visible);
+    document.getElementById("doctorGrid").classList.toggle("hidden", visible);
+  }
+
+  // ── Toast ────────────────────────────────────────────────────────────────
+  function showToast(msg, duration = 3500) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.remove("hidden");
+    setTimeout(() => t.classList.add("hidden"), duration);
+  }
+
+  // ── XSS helper ──────────────────────────────────────────────────────────
+  function esc(s) {
+    return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  // ── Auto-search on load if query param present ─────────────────────────
+  (() => {
+    const q = new URLSearchParams(window.location.search).get("q");
+    if (q) { document.getElementById("searchInput").value = q; handleSearch(); }
+  })();
+</script>
+
+</body>
+</html>

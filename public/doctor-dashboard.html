@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Doctor Dashboard — Smart Doctor Connect AI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .input-field { width:100%; border:1px solid #e2e8f0; border-radius:0.5rem; padding:0.6rem 0.85rem; font-size:0.875rem; outline:none; color:#1e293b; transition:border-color 0.15s; }
+    .input-field:focus { border-color:#0ea5e9; }
+    .slot-btn { padding:0.35rem 0.7rem; border-radius:0.5rem; font-size:0.75rem; border:1px solid #e2e8f0; cursor:pointer; transition:all 0.15s; }
+    .slot-btn.active { background:#0ea5e9; color:white; border-color:#0ea5e9; }
+    .slot-btn:hover:not(.active) { border-color:#0ea5e9; color:#0ea5e9; }
+    #toast { transition:opacity 0.3s,transform 0.3s; }
+    #toast.hidden { opacity:0; transform:translateY(20px); pointer-events:none; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
+
+<header class="bg-white shadow-sm sticky top-0 z-40">
+  <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2">
+      <span class="text-2xl">🏥</span>
+      <span class="font-bold text-lg text-sky-700">Smart Doctor<span class="text-slate-500 font-normal"> Connect</span></span>
+    </a>
+    <nav class="flex gap-4 items-center text-sm">
+      <a href="/index.html" class="text-slate-500 hover:text-sky-600">Find Doctor</a>
+      <a href="/doctor-dashboard.html" class="text-sky-600 font-medium">For Doctors</a>
+    </nav>
+  </div>
+</header>
+
+<section class="bg-gradient-to-br from-emerald-700 via-emerald-600 to-teal-500 text-white py-10 px-4">
+  <div class="max-w-3xl mx-auto text-center">
+    <h1 class="text-3xl sm:text-4xl font-extrabold mb-2">👨‍⚕️ Doctor Dashboard</h1>
+    <p class="text-emerald-100">Register your practice and start receiving AI-powered patient matches.</p>
+  </div>
+</section>
+
+<main class="max-w-2xl mx-auto px-4 py-8">
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+    <h2 class="text-xl font-bold text-slate-800 mb-1">Register Your Practice</h2>
+    <p class="text-sm text-slate-500 mb-6">Fill in your details to appear in patient searches.</p>
+    <form id="registerForm" class="space-y-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div><label class="text-xs font-semibold text-slate-500 mb-1 block">Full Name *</label><input id="docName" type="text" placeholder="Dr. Sara Ahmed" class="input-field" required /></div>
+        <div><label class="text-xs font-semibold text-slate-500 mb-1 block">Specialization *</label><input id="docSpec" type="text" placeholder="Cardiologist" class="input-field" list="specList" required /><datalist id="specList"><option value="General Physician"><option value="Cardiologist"><option value="Dermatologist"><option value="Pediatrician"><option value="Orthopedic Surgeon"><option value="Neurologist"><option value="Gastroenterologist"><option value="Gynecologist"><option value="ENT Specialist"><option value="Pulmonologist"><option value="Endocrinologist"><option value="Psychiatrist"><option value="Ophthalmologist"><option value="Urologist"><option value="Dentist"></datalist></div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div><label class="text-xs font-semibold text-slate-500 mb-1 block">Location *</label><input id="docLocation" type="text" placeholder="Lahore" class="input-field" list="cityList" required /><datalist id="cityList"><option value="Karachi"><option value="Lahore"><option value="Islamabad"><option value="Rawalpindi"><option value="Faisalabad"><option value="Multan"><option value="Peshawar"><option value="Quetta"></datalist></div>
+        <div><label class="text-xs font-semibold text-slate-500 mb-1 block">Consultation Type *</label><select id="docConsultType" class="input-field"><option value="both">Both</option><option value="online">Online</option><option value="in_person">In-Person</option></select></div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div><label class="text-xs font-semibold text-slate-500 mb-1 block">Email *</label><input id="docEmail" type="email" placeholder="sara@example.com" class="input-field" required /></div>
+        <div><label class="text-xs font-semibold text-slate-500 mb-1 block">Phone *</label><input id="docPhone" type="tel" placeholder="+92 300 1234567" class="input-field" required /></div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div><label class="text-xs font-semibold text-slate-500 mb-1 block">Experience (years) *</label><input id="docExperience" type="number" min="0" max="60" placeholder="10" class="input-field" required /></div>
+        <div><label class="text-xs font-semibold text-slate-500 mb-1 block">Fee (PKR) *</label><input id="docFee" type="number" min="0" placeholder="2000" class="input-field" required /></div>
+      </div>
+      <div><label class="text-xs font-semibold text-slate-500 mb-1 block">Bio</label><textarea id="docBio" placeholder="Brief description..." class="input-field resize-none h-20"></textarea></div>
+      <div>
+        <label class="text-xs font-semibold text-slate-500 mb-2 block">Weekly Availability</label>
+        <p class="text-xs text-slate-400 mb-3">Click slots to toggle.</p>
+        <div id="availabilityPicker" class="space-y-3"></div>
+      </div>
+      <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl transition-colors text-sm mt-2">Register Doctor Profile</button>
+    </form>
+  </div>
+  <div class="mt-8">
+    <h2 class="text-lg font-bold text-slate-700 mb-4">📋 Registered Doctors</h2>
+    <div id="doctorList" class="space-y-3"><p class="text-sm text-slate-400">Loading...</p></div>
+  </div>
+</main>
+
+<div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-800 text-white text-sm px-5 py-3 rounded-full shadow-lg"></div>
+
+<script>
+const API_BASE="/api";
+const DAYS=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+const TIME_SLOTS=["09:00","09:30","10:00","10:30","11:00","11:30","12:00","12:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00"];
+const selectedSlots={};
+DAYS.forEach(d=>selectedSlots[d]=new Set());
+
+function buildPicker(){
+  const c=document.getElementById("availabilityPicker");c.innerHTML="";
+  DAYS.forEach(day=>{
+    const div=document.createElement("div");
+    div.innerHTML=`<p class="text-sm font-medium text-slate-700 mb-1">${day}</p><div class="flex flex-wrap gap-1.5" id="slots-${day}"></div>`;
+    c.appendChild(div);
+    const sd=div.querySelector(`#slots-${day}`);
+    TIME_SLOTS.forEach(slot=>{
+      const btn=document.createElement("button");btn.type="button";btn.className="slot-btn";btn.textContent=slot;
+      btn.onclick=()=>{if(selectedSlots[day].has(slot)){selectedSlots[day].delete(slot);btn.classList.remove("active")}else{selectedSlots[day].add(slot);btn.classList.add("active")}};
+      sd.appendChild(btn);
+    });
+  });
+}
+
+function getAvailability(){const a={};DAYS.forEach(d=>{if(selectedSlots[d].size>0)a[d]=Array.from(selectedSlots[d]).sort()});return a}
+
+document.getElementById("registerForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const p={name:document.getElementById("docName").value.trim(),specialization:document.getElementById("docSpec").value.trim(),location:document.getElementById("docLocation").value.trim(),consultation_type:document.getElementById("docConsultType").value,email:document.getElementById("docEmail").value.trim(),phone:document.getElementById("docPhone").value.trim(),experience_years:parseInt(document.getElementById("docExperience").value)||0,consultation_fee:parseInt(document.getElementById("docFee").value)||0,bio:document.getElementById("docBio").value.trim()||null,availability:getAvailability(),is_available:true,rating:0,total_reviews:0};
+  try{
+    const r=await fetch(`${API_BASE}/doctors/`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});
+    if(r.status===409){showToast("⚠️ Email already exists.");return}
+    if(r.status===422){const e=await r.json();showToast("❌ "+(e.detail?.[0]?.msg||"Validation error."));return}
+    if(!r.ok)throw new Error();
+    showToast("✅ Registered!");document.getElementById("registerForm").reset();DAYS.forEach(d=>selectedSlots[d].clear());document.querySelectorAll(".slot-btn").forEach(b=>b.classList.remove("active"));loadDoctors();
+  }catch{showToast("Registration failed.")}
+});
+
+async function loadDoctors(){
+  const c=document.getElementById("doctorList");
+  try{
+    const r=await fetch(`${API_BASE}/doctors/?limit=50`);if(!r.ok)throw new Error();const docs=await r.json();
+    if(!docs.length){c.innerHTML='<p class="text-sm text-slate-400">No doctors registered yet.</p>';return}
+    c.innerHTML=docs.map(d=>`<div class="bg-white rounded-xl border border-slate-200 p-4 flex items-center justify-between gap-3"><div class="flex-1 min-w-0"><h3 class="font-bold text-slate-800 text-sm">${esc(d.name)}</h3><p class="text-xs text-sky-600">${esc(d.specialization)} — ${esc(d.location)}</p></div><div class="text-right shrink-0"><span class="${d.is_available?'bg-green-100 text-green-700':'bg-red-100 text-red-600'} text-xs font-semibold px-2 py-0.5 rounded-full">${d.is_available?'Available':'Unavailable'}</span><p class="text-xs text-slate-400 mt-1">Rs. ${d.consultation_fee?.toLocaleString()}</p></div></div>`).join("");
+  }catch{c.innerHTML='<p class="text-sm text-red-400">Failed to load.</p>'}
+}
+
+function showToast(m,d=3500){const t=document.getElementById("toast");t.textContent=m;t.classList.remove("hidden");setTimeout(()=>t.classList.add("hidden"),d)}
+function esc(s){return String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+
+buildPicker();loadDoctors();
+</script>
+</body>
+</html>
