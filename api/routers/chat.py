@@ -22,6 +22,8 @@ from api.models import (
     TriageMessageResponse,
     DoctorResponse,
     UrgencyLevel,
+    ChatSummaryRequest,
+    ChatSummaryResponse,
 )
 from api.services.ai_agent import ai_agent
 from api.services.recommender import SymptomRecommender
@@ -305,4 +307,84 @@ Do NOT write any JSON or markdown formatting, write plain text only."""
         urgency=urgency,
         home_advice=home_advice,
         doctors=doctors,
+    )
+
+
+# ── Chat Summary Generation ───────────────────────────────────────────────────
+@router.post(
+    "/summary",
+    response_model=ChatSummaryResponse,
+    summary="Generate a 3-bullet AI summary of the chat and link to appointment",
+)
+async def generate_chat_summary(payload: ChatSummaryRequest):
+    db = get_db()
+    
+    # 1. Format conversation history
+    convo_text = ""
+    for msg in payload.chat_history:
+        convo_text += f"{msg.role}: {msg.content}\n"
+        
+    # 2. Invoke LLM for summary and triage data
+    triage_summary = "1. Pending analysis\n2. Pending analysis\n3. Pending analysis"
+    priority_level = "NORMAL"
+    suggested_actions = ["Pending initial doctor review"]
+    
+    llm = recommender._get_llm()
+    if llm:
+        prompt = f"""You are an elite High-Urgency Triage Agent and Pre-Consultation Specialist.
+Analyze the following patient-receptionist conversation.
+
+Conversation:
+{convo_text}
+
+Provide your analysis strictly in the following JSON format:
+{{
+  "summary": "Exactly 3 concise, professional bullet points highlighting symptoms, urgency, and relevant context. (Separate with newlines e.g. - Point 1\\n- Point 2)",
+  "priority_level": "CRITICAL" or "HIGH" or "NORMAL",
+  "suggested_actions": ["Lab test 1 to order", "Baseline question 1 to ask", "Observation to make"]
+}}
+"""
+        try:
+            from langchain_core.messages import HumanMessage
+            import json
+            response = await llm.ainvoke([HumanMessage(content=prompt)])
+            text = response.content.strip()
+            if text.startswith("```json"):
+                text = text.replace("```json", "", 1)
+            if text.endswith("```"):
+                text = text[:-3]
+            data = json.loads(text.strip())
+            
+            triage_summary = data.get("summary", triage_summary)
+            priority_level = data.get("priority_level", "NORMAL").upper()
+            suggested_actions = data.get("suggested_actions", suggested_actions)
+        except Exception as e:
+            print(f"Error generating agentic summary: {e}")
+            
+    # 3. Find latest appointment for this patient and doctor
+    cursor = db.appointments.find({
+        "doctor_id": payload.doctor_id,
+        "patient_name": {"$regex": re.compile(f"^{re.escape(payload.patient_name)}$", re.IGNORECASE)}
+    }).sort("created_at", -1).limit(1)
+    
+    appts = await cursor.to_list(length=1)
+    updated_appt_id = None
+    
+    if appts:
+        appt = appts[0]
+        updated_appt_id = str(appt["_id"])
+        await db.appointments.update_one(
+            {"_id": appt["_id"]},
+            {"$set": {
+                "triage_summary": triage_summary,
+                "priority_level": priority_level,
+                "suggested_actions": suggested_actions
+            }}
+        )
+        
+    return ChatSummaryResponse(
+        triage_summary=triage_summary,
+        updated_appointment_id=updated_appt_id,
+        priority_level=priority_level,
+        suggested_actions=suggested_actions
     )

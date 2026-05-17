@@ -16,7 +16,7 @@ from slowapi import _rate_limit_exceeded_handler
 from api.database import connect_db, close_db
 from api.limiter import limiter
 from api.services.scheduler import scheduler
-from api.routers import doctors, appointments, chat
+from api.routers import doctors, appointments, chat, agents
 
 # ─────────────────────────────────────────────────────────────
 # Environment
@@ -102,6 +102,12 @@ app.include_router(
     chat.router,
     prefix="/api/chat",
     tags=["Chat"]
+)
+
+app.include_router(
+    agents.router,
+    prefix="/api",
+    tags=["Agents"]
 )
 
 # ─────────────────────────────────────────────────────────────

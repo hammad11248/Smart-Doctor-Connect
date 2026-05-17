@@ -196,3 +196,103 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+// ── Finish Chat and Summarize ───────────────────────────────────────────────
+async function finishChatAndSummarize() {
+  if (!chatDoctorId) {
+    showToast("No doctor selected.");
+    return;
+  }
+
+  const nameInput = document.getElementById("chatName");
+  const name = nameInput?.value.trim() || "Patient";
+
+  const container = document.getElementById("chatMessages");
+  if (!container || !container.children.length) {
+    showToast("No conversation to summarize.");
+    return;
+  }
+
+  const history = [];
+  Array.from(container.children).forEach((bubble) => {
+    if (bubble.id && bubble.id.startsWith("typing")) return;
+    const isPatient = bubble.className.includes("self-end");
+    const role = isPatient ? "Patient" : "AI";
+    const pTag = bubble.querySelector("p");
+    if (pTag) {
+      history.push({ role, content: pTag.textContent });
+    }
+  });
+
+  if (!history.length) return;
+
+  const btn = event.currentTarget;
+  const originalText = btn.innerHTML;
+  btn.innerHTML = `<span class="animate-pulse">Syncing Briefing...</span>`;
+  btn.disabled = true;
+
+  try {
+    const resp = await fetch(`${API_BASE}/chat/summary`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        doctor_id: chatDoctorId,
+        patient_name: name,
+        chat_history: history,
+      }),
+    });
+
+    if (!resp.ok) throw new Error("Failed to generate summary");
+    
+    const data = await resp.json();
+    showToast("✅ Triage summary successfully linked to appointment!");
+
+    // Agentic Doctor Matching
+    const matchResp = await fetch(`${API_BASE}/agents/match-doctor`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        triage_summary: data.triage_summary,
+      }),
+    });
+
+    if (matchResp.ok) {
+      const matchData = await matchResp.json();
+      displayAgentRecommendations(matchData);
+    }
+
+  } catch (err) {
+    console.error(err);
+    showToast("⚠️ Could not generate summary. Please check connection.");
+  } finally {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
+}
+
+function displayAgentRecommendations(matchData) {
+  const container = document.getElementById("chatMessages");
+  if (!container) return;
+
+  const bubble = document.createElement("div");
+  bubble.className = "self-start bg-cyan-900/40 text-cyan-50 rounded-[1.2rem] rounded-tl-sm px-4 py-3 max-w-[85%] shadow-md border border-cyan-500/20";
+  
+  let docsHtml = matchData.doctors.map(d => {
+    return `<div class="bg-slate-950/60 p-2 rounded-xl mt-2 border border-white/5">
+      <p class="text-xs font-bold text-white">${d.name}</p>
+      <p class="text-[9px] text-cyan-400">${d.specialization} • ${d.location}</p>
+    </div>`;
+  }).join("");
+
+  bubble.innerHTML = `
+    <div class="flex items-center gap-1.5 mb-1.5">
+      <span class="text-[10px] font-black tracking-widest uppercase text-cyan-400">Agent Specialist Matching</span>
+    </div>
+    <p class="text-xs leading-relaxed mb-2">${matchData.reasoning}</p>
+    ${docsHtml}
+  `;
+  
+  container.appendChild(bubble);
+  container.scrollTop = container.scrollHeight;
+}
+

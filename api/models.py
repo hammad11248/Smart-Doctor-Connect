@@ -108,6 +108,9 @@ class AppointmentCreate(MongoBaseModel):
     time_slot: str = Field(..., pattern=r"^\d{2}:\d{2}$", examples=["10:00"])
     consultation_type: ConsultationType
     symptoms: Optional[str] = Field(None, max_length=500)
+    triage_summary: Optional[str] = Field(None, description="AI-generated summary of triage chat")
+    priority_level: str = Field("NORMAL", description="Set to CRITICAL by Triage Agent if severe")
+    suggested_actions: List[str] = Field(default_factory=list, description="Agentic preliminary tests/actions")
 
 
 class AppointmentInDB(AppointmentCreate):
@@ -141,6 +144,34 @@ class MessageInDB(MessageCreate):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     model_config = {"populate_by_name": True}
+
+
+class ChatMessageItem(BaseModel):
+    role: str
+    content: str
+
+
+class ChatSummaryRequest(MongoBaseModel):
+    doctor_id: str
+    patient_name: str
+    chat_history: List[ChatMessageItem]
+
+
+class ChatSummaryResponse(MongoBaseModel):
+    triage_summary: str
+    updated_appointment_id: Optional[str] = None
+    priority_level: str = "NORMAL"
+    suggested_actions: List[str] = Field(default_factory=list)
+
+
+class AgentMatchRequest(MongoBaseModel):
+    triage_summary: str
+    patient_location: Optional[str] = None
+
+
+class AgentMatchResponse(MongoBaseModel):
+    doctors: List[DoctorResponse]
+    reasoning: str
 
 
 # ── AI Search Models ──────────────────────────────────────────────────────────

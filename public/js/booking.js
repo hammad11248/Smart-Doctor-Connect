@@ -35,15 +35,39 @@ function openBooking(doctorId, doctorName, availability) {
 }
 
 // ── Update Time Slots Based on Date ─────────────────────────────────────────
-function updateTimeSlots(dateStr) {
+async function updateTimeSlots(dateStr) {
   const day = getDayName(dateStr);
   const slots = activeDoctorSlots[day] || [];
   const sel = document.getElementById("bookTimeSlot");
   if (!sel) return;
 
-  sel.innerHTML = slots.length
-    ? slots.map((s) => `<option value="${s}">${s}</option>`).join("")
-    : `<option value="">No slots available for ${day}</option>`;
+  sel.innerHTML = `<option value="">Checking availability...</option>`;
+
+  try {
+    const resp = await fetch(`${API_BASE}/appointments/available-slots/${activeDoctorId}?date=${dateStr}`);
+    if (resp.ok) {
+      const data = await resp.json();
+      const booked = new Set(data.booked_slots || []);
+      
+      sel.innerHTML = slots.length
+        ? slots.map((s) => {
+            const isBooked = booked.has(s);
+            if (isBooked) {
+              return `<option value="${s}" disabled class="text-slate-600 bg-slate-900">${s} (Booked)</option>`;
+            }
+            return `<option value="${s}" class="text-white">${s}</option>`;
+          }).join("")
+        : `<option value="">No slots available for ${day}</option>`;
+    } else {
+      throw new Error("Failed to fetch slots");
+    }
+  } catch (err) {
+    console.error("Availability check failed:", err);
+    // Fallback if API fails
+    sel.innerHTML = slots.length
+      ? slots.map((s) => `<option value="${s}" class="text-white">${s}</option>`).join("")
+      : `<option value="">No slots available for ${day}</option>`;
+  }
 }
 
 // ── Close Modal ─────────────────────────────────────────────────────────────

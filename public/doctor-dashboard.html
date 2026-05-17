@@ -393,6 +393,56 @@
 
   </main>
 
+  <!-- ── BRIEFING MODAL ──────────────────────────────────────────────────────── -->
+  <div id="briefingModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 px-4 backdrop-blur-md font-sans">
+    <div class="cyber-card rounded-[2rem] rounded-tr-md shadow-2xl w-full max-w-lg p-6 relative border border-white/10">
+      <button onclick="closeBriefingModal()" class="absolute top-4 right-4 text-slate-500 hover:text-white text-3xl leading-none transition-colors">&times;</button>
+      
+      <div class="flex items-center gap-3.5 mb-5 border-b border-white/5 pb-3">
+        <div class="w-11 h-11 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-xl shadow-inner">🧠</div>
+        <div>
+          <h3 class="font-display font-extrabold text-base text-white leading-none">End-to-End Briefing</h3>
+          <p class="text-xs text-violet-400 font-bold mt-1.5" id="briefName">—</p>
+        </div>
+        <div class="ml-auto">
+          <span id="briefPriority" class="text-[9px] font-black tracking-widest uppercase px-3 py-1.5 rounded-full bg-slate-900 text-slate-500">NORMAL</span>
+        </div>
+      </div>
+
+      <div class="space-y-4 mb-5">
+        <div class="grid grid-cols-2 gap-3 text-xs">
+          <div class="bg-slate-900/60 p-3 rounded-xl border border-white/5">
+            <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Time Slot</p>
+            <p class="font-bold text-white" id="briefSlot">—</p>
+          </div>
+          <div class="bg-slate-900/60 p-3 rounded-xl border border-white/5">
+            <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Contact</p>
+            <p class="font-bold text-white" id="briefContact">—</p>
+          </div>
+        </div>
+        
+        <div>
+          <label class="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1.5">AI Triage Summary</label>
+          <div class="bg-slate-950 border border-violet-500/20 rounded-xl p-4 shadow-inner text-sm text-slate-300 font-medium whitespace-pre-line leading-relaxed" id="briefSummary">
+            Waiting for AI analysis...
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Agent Suggested Actions</label>
+          <ul class="space-y-1.5 bg-slate-900/60 p-3 rounded-xl border border-white/5 text-xs text-cyan-100 font-medium" id="briefActions">
+            <li class="italic text-slate-500">No actions suggested yet.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="flex gap-3">
+        <button id="briefCompleteBtn" class="flex-1 btn-premium text-white font-black py-3 rounded-xl transition-all text-xs tracking-widest uppercase shadow-lg">Mark Completed</button>
+      </div>
+    </div>
+  </div>
+
+
   <!-- ── TOAST NOTIFICATION ──────────────────────────────────────────────────── -->
   <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50
        bg-slate-900 text-white text-xs font-bold px-6 py-3.5 rounded-full shadow-2xl flex items-center gap-2 border border-slate-800">
@@ -606,7 +656,10 @@
       });
     }
 
+    let currentAppts = [];
+
     function renderAppointments(appts, slotData) {
+      currentAppts = appts;
       const wrap = document.getElementById("schedApptsWrap");
       const list = document.getElementById("schedApptsList");
       wrap.classList.remove("hidden");
@@ -631,7 +684,10 @@
         const id = a._id || a.id;
         const wait = a.predicted_wait_minutes != null ? a.predicted_wait_minutes : i * AVG_CONSULT;
         return `
-          <div class="bg-slate-950/40 border border-white/5 rounded-2xl p-4 shadow-sm hover:border-cyan-500/40 transition-colors">
+          <div onclick="openBriefingModal('${id}')" class="bg-slate-950/40 border border-white/5 rounded-2xl p-4 shadow-sm hover:border-cyan-500/40 transition-colors cursor-pointer relative group">
+            <div class="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition-opacity">
+              <span class="bg-violet-900/60 text-violet-300 px-2.5 py-1 rounded text-[9px] font-bold">View Briefing ↗</span>
+            </div>
             <div class="flex items-center justify-between mb-2">
               <div>
                 <h4 class="font-extrabold text-white text-xs">${esc(a.patient_name)}</h4>
@@ -651,8 +707,8 @@
             ${a.symptoms ? `<p class="text-[9px] bg-slate-900/60 p-2.5 rounded-lg text-slate-450 italic mb-3">"${esc(a.symptoms)}"</p>` : ""}
             
             <div class="flex gap-2 mt-2">
-              ${a.status !== "completed" ? `<button onclick="updateApptStatus('${id}','completed')" class="text-[9px] font-black px-3.5 py-2 rounded-xl bg-violet-950/40 text-violet-400 hover:bg-violet-950/60 transition-colors flex-1 shadow-sm border border-violet-500/20">Complete</button>` : ""}
-              ${a.status !== "cancelled" ? `<button onclick="updateApptStatus('${id}','cancelled')" class="text-[9px] font-black px-3.5 py-2 rounded-xl bg-red-950/40 text-red-400 hover:bg-red-950/60 transition-colors flex-1 shadow-sm border border-red-500/20">Cancel</button>` : ""}
+              ${a.status !== "completed" ? `<button onclick="event.stopPropagation(); updateApptStatus('${id}','completed')" class="text-[9px] font-black px-3.5 py-2 rounded-xl bg-violet-950/40 text-violet-400 hover:bg-violet-950/60 transition-colors flex-1 shadow-sm border border-violet-500/20">Complete</button>` : ""}
+              ${a.status !== "cancelled" ? `<button onclick="event.stopPropagation(); updateApptStatus('${id}','cancelled')" class="text-[9px] font-black px-3.5 py-2 rounded-xl bg-red-950/40 text-red-400 hover:bg-red-950/60 transition-colors flex-1 shadow-sm border border-red-500/20">Cancel</button>` : ""}
             </div>
           </div>`;
       }).join("");
@@ -669,6 +725,52 @@
       } catch (err) {
         showToast("Failed to update appointment status.");
       }
+    }
+
+    function openBriefingModal(id) {
+      const appt = currentAppts.find(a => (a._id || a.id) === id);
+      if (!appt) return;
+
+      document.getElementById("briefName").textContent = appt.patient_name;
+      document.getElementById("briefSlot").textContent = appt.time_slot;
+      document.getElementById("briefContact").textContent = appt.patient_contact;
+      
+      const summaryEl = document.getElementById("briefSummary");
+      if (appt.triage_summary) {
+        summaryEl.textContent = appt.triage_summary;
+        summaryEl.className = "bg-slate-950 border border-violet-500/20 rounded-xl p-4 shadow-inner text-sm text-white font-medium whitespace-pre-line leading-relaxed";
+      } else {
+        summaryEl.textContent = "No AI Triage Summary available. Patient may have skipped triage or summary is generating.";
+        summaryEl.className = "bg-slate-950 border border-slate-500/20 rounded-xl p-4 shadow-inner text-sm text-slate-500 font-medium whitespace-pre-line leading-relaxed italic";
+      }
+      
+      const priorityEl = document.getElementById("briefPriority");
+      const priority = appt.priority_level || "NORMAL";
+      priorityEl.textContent = priority;
+      priorityEl.className = `text-[9px] font-black tracking-widest uppercase px-3 py-1.5 rounded-full ${
+        priority === 'CRITICAL' ? 'bg-red-950/80 text-red-400 border border-red-500/40 animate-pulse' :
+        priority === 'HIGH' ? 'bg-orange-950/80 text-orange-400 border border-orange-500/40' :
+        'bg-green-950/40 text-green-400 border border-green-500/20'
+      }`;
+      
+      const actionsEl = document.getElementById("briefActions");
+      if (appt.suggested_actions && appt.suggested_actions.length > 0) {
+        actionsEl.innerHTML = appt.suggested_actions.map(action => `<li class="flex items-start gap-2"><span class="text-cyan-400 mt-0.5">↳</span> <span>${esc(action)}</span></li>`).join("");
+      } else {
+        actionsEl.innerHTML = `<li class="italic text-slate-500">No actions suggested yet.</li>`;
+      }
+
+      const completeBtn = document.getElementById("briefCompleteBtn");
+      completeBtn.onclick = () => {
+        closeBriefingModal();
+        updateApptStatus(id, 'completed');
+      };
+
+      document.getElementById("briefingModal").classList.remove("hidden");
+    }
+
+    function closeBriefingModal() {
+      document.getElementById("briefingModal").classList.add("hidden");
     }
 
     // ── Initialize Dashboard ───────────────────────────────────────────────────

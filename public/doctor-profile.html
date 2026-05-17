@@ -229,8 +229,11 @@
           </div>
           <div class="flex gap-2.5">
             <input id="chatMessage" type="text" placeholder="Describe symptoms or ask receptionist..." class="input-field flex-1 shadow-sm" />
-            <button onclick="sendMessage()" class="bg-cyan-600 hover:bg-cyan-700 text-white font-extrabold px-5 py-3.5 rounded-xl text-xs shadow-md transition-all shrink-0">Send</button>
+            <button onclick="sendChatMessage()" class="bg-cyan-600 hover:bg-cyan-700 text-white font-extrabold px-5 py-3.5 rounded-xl text-xs shadow-md transition-all shrink-0">Send</button>
           </div>
+          <button onclick="finishChatAndSummarize()" class="w-full bg-violet-600/20 hover:bg-violet-600/40 text-violet-300 font-extrabold px-5 py-2.5 rounded-xl text-xs shadow-md transition-all border border-violet-500/30">
+            Finish Chat & Sync Briefing
+          </button>
         </div>
       </div>
 
@@ -392,15 +395,34 @@
       updateSlots(today);
     }
 
-    function updateSlots(dateStr) {
+    async function updateSlots(dateStr) {
       const day = getDayName(dateStr);
       const slots = (doctorData?.availability || {})[day] || [];
       const select = document.getElementById("qbSlot");
       if (!select) return;
 
-      select.innerHTML = slots.length 
-        ? slots.map(s => `<option value="${s}">${s}</option>`).join("") 
-        : `<option value="">No slots configured for ${day}</option>`;
+      select.innerHTML = `<option value="">Checking availability...</option>`;
+
+      try {
+        const resp = await fetch(`${API_BASE}/appointments/available-slots/${doctorId}?date=${dateStr}`);
+        if (resp.ok) {
+          const data = await resp.json();
+          const booked = new Set(data.booked_slots || []);
+          
+          select.innerHTML = slots.length 
+            ? slots.map(s => {
+                if (booked.has(s)) return `<option value="${s}" disabled class="text-slate-600 bg-slate-900">${s} (Booked)</option>`;
+                return `<option value="${s}" class="text-white">${s}</option>`;
+              }).join("") 
+            : `<option value="">No slots configured for ${day}</option>`;
+        } else {
+          throw new Error("Failed");
+        }
+      } catch (err) {
+        select.innerHTML = slots.length 
+          ? slots.map(s => `<option value="${s}" class="text-white">${s}</option>`).join("") 
+          : `<option value="">No slots configured for ${day}</option>`;
+      }
     }
 
     async function quickBook() {
