@@ -1,201 +1,272 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Doctor Connect — AI Triage & Directory</title>
-  
+  <title>Smart Doctor Connect — AI-Powered Medical Triage & Specialist Finder</title>
+  <meta name="description" content="AI-powered medical symptom analysis, instant specialized triage and seamless appointment scheduling with top clinical experts across Pakistan." />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            display: ['Outfit', 'sans-serif'],
-          },
-          colors: {
-            brand: {
-              50: '#eff6ff',
-              100: '#dbeafe',
-              500: '#3b82f6',
-              600: '#2563eb',
-              900: '#1e3a8a',
-            },
-            teal: {
-              500: '#14b8a6',
-              600: '#0d9488',
-            }
-          }
-        }
-      }
-    }
-  </script>
-  
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/design-system.css">
+
   <style>
-    body {
-      background-color: #f8fafc;
-      color: #334155;
+    /* Page-specific: Hero section */
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.4rem 1rem; border-radius: 999px;
+      background: rgba(0,242,254,0.06); border: 1px solid rgba(0,242,254,0.15);
+      font-size: 0.7rem; font-weight: 700; color: var(--accent-cyan);
+      letter-spacing: 0.04em;
     }
-    
-    .glass-card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-      border-radius: 16px;
-      transition: all 0.2s ease-in-out;
+    .hero-title { max-width: 720px; margin: 0 auto; }
+    .hero-subtitle { max-width: 560px; margin: 0 auto; font-size: 0.95rem; }
+
+    /* Chat panel height */
+    .chat-panel { height: 680px; display: flex; flex-direction: column; }
+    .chat-messages { flex: 1; overflow-y: auto; padding-right: 0.5rem; }
+    .chat-messages > * { animation: fadeInUp 0.3s ease-out; }
+    .chat-input-bar { border-top: 1px solid var(--border-subtle); padding-top: 0.75rem; margin-top: auto; }
+
+    /* Search results column */
+    .results-panel { height: 680px; display: flex; flex-direction: column; }
+    .results-scroll { flex: 1; overflow-y: auto; padding-right: 0.5rem; }
+
+    /* Quick filter pills */
+    .filter-pill {
+      padding: 0.35rem 0.7rem; border-radius: 8px; font-size: 0.65rem;
+      font-weight: 700; color: var(--text-muted);
+      background: rgba(15,22,38,0.6); border: 1px solid var(--border-subtle);
+      cursor: pointer; transition: var(--transition-smooth);
     }
-    .glass-card:hover {
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-      transform: translateY(-2px);
+    .filter-pill:hover { border-color: rgba(0,242,254,0.4); color: var(--accent-cyan); }
+
+    /* Triage analysis card in results */
+    .triage-result-card {
+      border-left: 3px solid var(--accent-cyan);
+      background: rgba(0,242,254,0.03);
+      border-radius: 4px var(--radius-md) var(--radius-md) 4px;
+      padding: 1.25rem; margin-bottom: 1rem;
     }
 
-    .input-field {
-      width: 100%;
-      border: 1px solid #cbd5e1;
-      border-radius: 12px;
-      padding: 0.75rem 1rem;
-      font-size: 0.875rem;
-      font-weight: 500;
-      outline: none;
-      color: #1e293b;
-      background-color: #ffffff;
-      transition: all 0.2s ease;
+    /* Doctor result card in search */
+    .doctor-result {
+      display: flex; align-items: center; gap: 1.25rem;
+      padding: 1.25rem; transition: var(--transition-smooth);
     }
-    .input-field:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    .doctor-result:hover { transform: translateY(-1px); }
+    .doctor-avatar {
+      width: 56px; height: 56px; border-radius: 16px;
+      background: rgba(0,242,254,0.06); border: 1px solid rgba(0,242,254,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; flex-shrink: 0;
     }
+    .doctor-info { flex: 1; min-width: 0; }
+    .doctor-name { font-weight: 800; color: white; font-size: 1rem; font-family: var(--font-display); }
+    .doctor-spec { font-size: 0.75rem; font-weight: 700; color: var(--accent-cyan); margin-top: 2px; }
+    .doctor-meta { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.5rem; font-size: 0.7rem; color: var(--text-muted); font-weight: 600; }
+    .doctor-meta span { display: flex; align-items: center; gap: 0.3rem; }
 
-    .btn-primary {
-      background: #2563eb;
-      color: white;
-      transition: all 0.2s ease-in-out;
-      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
-    }
-    .btn-primary:hover {
-      background: #1d4ed8;
-      box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.3);
-      transform: translateY(-1px);
-    }
-
-    .btn-secondary {
-      background: #f1f5f9;
-      color: #475569;
-      border: 1px solid #cbd5e1;
-      transition: all 0.2s ease-in-out;
-    }
-    .btn-secondary:hover {
-      background: #e2e8f0;
-      color: #1e293b;
-    }
-    
-    .chat-bubble-ai {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      color: #1e3a8a;
-      border-bottom-left-radius: 4px;
-    }
-    .chat-bubble-user {
-      background: #2563eb;
-      color: #ffffff;
-      border-bottom-right-radius: 4px;
-    }
-
-    /* Typing animation */
-    .typing-dot {
-      animation: typing 1.4s infinite ease-in-out both;
-    }
-    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-    @keyframes typing {
-      0%, 80%, 100% { transform: scale(0); }
-      40% { transform: scale(1); }
-    }
-    
-    .skeleton {
-      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite linear;
-      border-radius: 12px;
-    }
-    @keyframes shimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
+    @media (max-width: 1024px) {
+      .chat-panel, .results-panel { height: auto; min-height: 500px; }
     }
   </style>
 </head>
 
-<body class="antialiased min-h-screen relative font-sans">
-  
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-brand-500 flex items-center justify-center shadow-md">
-          <span class="text-white text-xl">⚕️</span>
+<body>
+  <!-- ─── Header ─────────────────────────────────────────────────────── -->
+  <header class="site-header" id="siteHeader">
+    <div class="site-header__inner">
+      <a href="/" class="site-header__logo">
+        <div class="site-header__logo-icon">
+          <div class="site-header__logo-icon-inner">
+            <span class="text-gradient">SD</span>
+          </div>
         </div>
-        <div>
-          <span class="font-display font-bold text-xl text-slate-900 leading-none block">Smart Doctor</span>
-          <span class="text-brand-600 font-bold text-[10px] uppercase tracking-widest block mt-0.5">Connect AI</span>
+        <div class="site-header__logo-text">
+          <span>Smart Doctor</span>
+          <span>Connect AI</span>
         </div>
       </a>
-      <nav class="flex items-center gap-4 text-sm font-semibold">
-        <a href="/index.html" class="text-brand-600 bg-brand-50 px-4 py-2 rounded-lg">Directory</a>
-        <a href="/doctor-dashboard.html" class="text-slate-500 hover:text-slate-900 transition-colors">For Doctors</a>
+      <nav class="site-nav">
+        <a href="/index.html" class="site-nav__link site-nav__link--active">Directory & Triage</a>
+        <a href="/doctor-dashboard.html" class="site-nav__link">Clinical Operations</a>
       </nav>
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
-    
-    <!-- Left Col: AI Triage -->
-    <div class="lg:col-span-5 flex flex-col h-[700px]">
-      <div class="mb-4">
-        <h2 class="font-display text-2xl font-bold text-slate-900">AI Triage Assistant</h2>
-        <p class="text-sm text-slate-500 mt-1">Describe your symptoms to receive instant medical routing.</p>
+  <!-- ─── Hero Section ───────────────────────────────────────────────── -->
+  <section class="section-hero">
+    <div class="container text-center">
+      <div class="hero-badge" style="margin-bottom: 1.25rem;">
+        <span class="badge-dot badge-dot--pulse" style="color: var(--accent-cyan);"></span>
+        Dual-Engine Agentic Diagnostics Active
       </div>
-      
-      <div class="glass-card flex-1 flex flex-col p-5 h-full relative">
-        <div id="chatMessages" class="flex-1 overflow-y-auto space-y-4 mb-4 pr-2 scroll-smooth">
-          <div class="chat-bubble-ai self-start rounded-2xl px-4 py-3 max-w-[85%] shadow-sm text-sm leading-relaxed">
-            <p>Hello! I am the Smart Doctor Connect AI. How are you feeling today?</p>
+      <h1 class="hero-title" style="color: white; margin-bottom: 1rem;">
+        Universal Specialized Healthcare for <span class="text-gradient">Pakistan</span>
+      </h1>
+      <p class="hero-subtitle">
+        Chat with our Advanced Triage Agent to map symptoms, assess clinical urgency, and instantly secure slot bookings with top Pakistani specialists.
+      </p>
+    </div>
+  </section>
+
+  <!-- ─── Main Two-Column Layout ─────────────────────────────────────── -->
+  <section class="section-body">
+    <div class="container">
+      <div class="grid grid-12 gap-8">
+
+        <!-- ── Left Column: AI Triage Chat ──────────────────────────── -->
+        <div class="col-span-5">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+            <div>
+              <h2 style="color:white;font-size:1.15rem;display:flex;align-items:center;gap:0.5rem;">
+                <span class="badge-dot badge-dot--pulse" style="color:var(--accent-cyan);"></span>
+                AI Triage Assistant
+              </h2>
+              <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.2rem;">Describe your symptoms to the agent.</p>
+            </div>
+          </div>
+
+          <div class="glass-panel chat-panel" style="padding:1.5rem;">
+            <!-- Patient Name -->
+            <div id="triageNameFormArea" style="padding-bottom:1rem;margin-bottom:1rem;border-bottom:1px solid var(--border-subtle);">
+              <label class="label-micro" style="margin-bottom:0.5rem;display:block;">Patient Profile</label>
+              <div style="position:relative;">
+                <input id="triagePatientName" type="text" placeholder="Enter your full name to start triage..." class="input-field" style="padding-right:2.5rem;font-weight:600;" />
+                <span style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);opacity:0.4;font-size:0.9rem;">👤</span>
+              </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div id="triageChatMessages" class="chat-messages" style="display:flex;flex-direction:column;gap:0.75rem;">
+              <!-- Populated by triage-chat.js -->
+            </div>
+
+            <!-- Input Bar -->
+            <div class="chat-input-bar flex gap-3">
+              <input id="triageMessage" type="text" placeholder="Describe symptoms (e.g. chest pain, headache)..." class="input-field flex-1" />
+              <button onclick="sendTriageMessage()" class="btn btn-primary" style="padding:0.75rem 1.5rem;">Send</button>
+            </div>
           </div>
         </div>
-        
-        <div class="flex gap-2">
-          <input id="chatInput" type="text" placeholder="Type your symptoms here..." class="input-field flex-1" />
-          <button id="btnChat" class="btn-primary px-5 py-2.5 rounded-xl font-semibold shadow-md">Send</button>
+
+        <!-- ── Right Column: Specialist Directory ───────────────────── -->
+        <div class="col-span-7">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+            <div>
+              <h2 style="color:white;font-size:1.15rem;">Find Doctors & Specialists</h2>
+              <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.2rem;">Search the clinical registry or filter results.</p>
+            </div>
+            <span id="resultCount" class="badge badge--cyan">Featured</span>
+          </div>
+
+          <div class="results-panel">
+            <!-- Search Bar -->
+            <div class="glass-panel" style="padding:1.25rem;margin-bottom:1.25rem;">
+              <div class="flex gap-3" style="flex-wrap:wrap;">
+                <div style="position:relative;flex:1;min-width:200px;">
+                  <input id="searchInput" type="text" placeholder="Enter symptoms, specializations or locations..." class="input-field" style="padding-left:2.75rem;" />
+                  <span style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);opacity:0.4;font-size:0.85rem;">🔍</span>
+                </div>
+                <div class="flex gap-2">
+                  <button onclick="handleSearch()" class="btn btn-primary">Scan Registry</button>
+                  <button onclick="loadFeaturedDoctors()" class="btn btn-outline">📍 Nearby</button>
+                </div>
+              </div>
+              <div class="flex gap-2" style="margin-top:1rem;padding-top:0.75rem;border-top:1px solid var(--border-subtle);flex-wrap:wrap;align-items:center;">
+                <span class="label-micro" style="margin-right:0.25rem;">Quick Filters:</span>
+                <button onclick="fillSearch('Cardiologist')" class="filter-pill">Cardiology</button>
+                <button onclick="fillSearch('Dermatologist')" class="filter-pill">Dermatology</button>
+                <button onclick="fillSearch('Pediatrician')" class="filter-pill">Pediatrics</button>
+                <button onclick="fillSearch('Neurologist')" class="filter-pill">Neurology</button>
+                <button onclick="fillSearch('Gynecologist')" class="filter-pill">Gynecology</button>
+                <button onclick="fillSearch('Orthopedic')" class="filter-pill">Orthopedics</button>
+              </div>
+            </div>
+
+            <!-- Results Heading -->
+            <h3 id="resultsHeading" class="label-micro" style="margin-bottom:0.75rem;padding-left:0.25rem;">Clinical Results</h3>
+
+            <!-- Results Grid -->
+            <div id="docResults" class="results-scroll" style="display:flex;flex-direction:column;gap:0.75rem;">
+              <!-- Populated by search.js -->
+            </div>
+          </div>
         </div>
+
       </div>
     </div>
+  </section>
 
-    <!-- Right Col: Directory -->
-    <div class="lg:col-span-7 flex flex-col h-[700px]">
-      <div class="mb-4">
-        <h1 class="font-display text-3xl font-bold text-slate-900">Find a Specialist</h1>
-        <p class="text-sm text-slate-500 mt-1">Browse verified medical professionals.</p>
-      </div>
+  <!-- ─── Booking Modal ──────────────────────────────────────────────── -->
+  <div id="bookingModal" class="hidden" style="position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(11,15,25,0.85);backdrop-filter:blur(12px);padding:1rem;">
+    <div class="glass-panel" style="width:100%;max-width:520px;padding:2rem;position:relative;border-color:rgba(0,242,254,0.2);">
+      <button onclick="closeModal()" style="position:absolute;top:1.25rem;right:1.5rem;background:none;border:none;color:var(--text-muted);font-size:1.5rem;cursor:pointer;transition:var(--transition-smooth);" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--text-muted)'">&times;</button>
 
-      <div class="glass-card p-5 mb-6">
-        <div class="flex flex-col sm:flex-row gap-3">
-          <input id="searchQuery" type="text" placeholder="Search doctors, specializations, or conditions..." class="input-field flex-1" />
-          <button id="btnSearch" class="btn-primary px-6 py-2.5 rounded-xl font-semibold shadow-md whitespace-nowrap">Search</button>
-          <button id="btnNearMe" class="btn-secondary px-4 py-2.5 rounded-xl font-semibold whitespace-nowrap">📍 Near Me</button>
+      <div class="flex items-center gap-4" style="margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border-subtle);">
+        <div style="width:48px;height:48px;border-radius:14px;background:rgba(0,242,254,0.08);border:1px solid rgba(0,242,254,0.15);display:flex;align-items:center;justify-content:center;font-size:1.5rem;">📅</div>
+        <div>
+          <h3 style="color:white;font-size:1.2rem;">Book Appointment</h3>
+          <p id="modalDoctorName" style="font-size:0.7rem;color:var(--accent-cyan);font-weight:700;letter-spacing:0.05em;text-transform:uppercase;margin-top:2px;">Physician Slot Availability</p>
         </div>
       </div>
 
-      <div id="docResults" class="flex-1 overflow-y-auto space-y-4 pr-2 pb-10">
-        <!-- JS populates this -->
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="label-micro" style="margin-bottom:0.4rem;display:block;">Patient Name *</label>
+            <input id="bookPatientName" type="text" placeholder="e.g. Hammad" class="input-field" required />
+          </div>
+          <div>
+            <label class="label-micro" style="margin-bottom:0.4rem;display:block;">Contact Number *</label>
+            <input id="bookPatientContact" type="tel" placeholder="+92 300 1234567" class="input-field" required />
+          </div>
+        </div>
+        <div>
+          <label class="label-micro" style="margin-bottom:0.4rem;display:block;">Email Address *</label>
+          <input id="bookPatientEmail" type="email" placeholder="user@gmail.com" class="input-field" required />
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="label-micro" style="margin-bottom:0.4rem;display:block;">Appointment Date *</label>
+            <input id="bookDate" type="date" class="input-field" required />
+          </div>
+          <div>
+            <label class="label-micro" style="margin-bottom:0.4rem;display:block;">Time Slot *</label>
+            <select id="bookTimeSlot" class="input-field" required>
+              <option value="">Select slot...</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="label-micro" style="margin-bottom:0.4rem;display:block;">Consultation Mode</label>
+          <select id="bookConsultType" class="input-field">
+            <option value="online">Online Video/Audio Session</option>
+            <option value="in_person">In-Person Clinic Visit</option>
+            <option value="both">Both (Agreed with doctor)</option>
+          </select>
+        </div>
+        <div>
+          <label class="label-micro" style="margin-bottom:0.4rem;display:block;">Note / Primary Symptoms</label>
+          <textarea id="bookSymptoms" placeholder="Symptom summary or briefing..." class="input-field" style="min-height:60px;resize:none;"></textarea>
+        </div>
+      </div>
+
+      <div class="flex gap-3" style="margin-top:1.5rem;">
+        <button onclick="closeModal()" class="btn btn-ghost flex-1">Cancel</button>
+        <button onclick="submitBooking()" class="btn btn-primary flex-1">Confirm Schedule</button>
       </div>
     </div>
+  </div>
 
-  </main>
+  <!-- ─── Toast ──────────────────────────────────────────────────────── -->
+  <div id="toast" class="hidden" style="position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:300;background:rgba(11,15,25,0.9);border:1px solid rgba(0,242,254,0.2);color:white;font-size:0.75rem;font-weight:700;padding:0.85rem 1.5rem;border-radius:999px;backdrop-filter:blur(12px);box-shadow:var(--shadow-float);display:flex;align-items:center;gap:0.5rem;transition:var(--transition-smooth);"></div>
 
+  <!-- ─── Scripts (preserving all API integrations) ───────────────────── -->
   <script src="/js/app.js"></script>
+  <script src="/js/booking.js"></script>
   <script src="/js/search.js"></script>
   <script src="/js/triage-chat.js"></script>
 </body>

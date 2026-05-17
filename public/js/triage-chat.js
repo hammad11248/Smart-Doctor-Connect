@@ -8,6 +8,7 @@
 let triageChatOpen = false;
 let triageSending = false;
 let triagePatientName = "";
+let latestSymptoms = "";
 
 // ── Toggle Widget ────────────────────────────────────────────────────────────
 function toggleTriageChat() {
@@ -80,6 +81,7 @@ async function sendTriageMessage() {
   }
 
   // Display user's message
+  latestSymptoms = message;
   addTriageBubble(message, "patient", triagePatientName);
   msgInput.value = "";
   triageSending = true;
@@ -137,11 +139,8 @@ function addTriageBubble(text, type, sender) {
   const bubble = document.createElement("div");
   const isPatient = type === "patient";
 
-  bubble.className = `max-w-[85%] p-3.5 text-sm leading-relaxed shadow-sm ${
-    isPatient
-      ? "chat-bubble-user self-end ml-auto rounded-2xl rounded-tr-sm"
-      : "chat-bubble-ai self-start mr-auto rounded-2xl rounded-tl-sm"
-  }`;
+  bubble.style.cssText = `max-width:80%;padding:1rem 1.25rem;font-size:0.85rem;line-height:1.6;${isPatient ? 'margin-left:auto;' : 'margin-right:auto;'}`;
+  bubble.className = isPatient ? 'chat-bubble-user' : 'chat-bubble-ai';
 
   const timeStr = new Date().toLocaleTimeString("en-US", {
     hour: "numeric",
@@ -149,11 +148,11 @@ function addTriageBubble(text, type, sender) {
   });
 
   bubble.innerHTML = `
-    <div class="flex items-center gap-1.5 mb-1.5 opacity-80">
-      <span class="font-bold text-[10px] uppercase tracking-wider">${esc(sender)}</span>
-      <span class="text-[9px] opacity-70">${timeStr}</span>
+    <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.4rem;opacity:0.8;">
+      <span style="font-weight:800;font-size:0.6rem;text-transform:uppercase;letter-spacing:0.1em;color:${isPatient ? 'white' : 'var(--accent-cyan)'}">${esc(sender)}</span>
+      <span style="font-size:0.55rem;opacity:0.6;">${timeStr}</span>
     </div>
-    <p class="whitespace-pre-line">${esc(text)}</p>
+    <p style="white-space:pre-line;">${esc(text)}</p>
   `;
 
   container.appendChild(bubble);
@@ -172,17 +171,25 @@ function addTriageRecommendationCard(data) {
     LOW: "bg-green-500 text-white",
   };
 
+  const urgencyClass = {
+    EMERGENCY: "urgency-emergency",
+    HIGH: "urgency-high",
+    MEDIUM: "urgency-medium",
+    LOW: "urgency-low",
+  };
+
   const card = document.createElement("div");
-  card.className = "bg-white border border-brand-100 rounded-xl p-4 my-2 self-start mr-auto w-[90%] text-sm shadow-sm text-slate-700";
+  card.className = "triage-result-card";
+  card.style.cssText = "margin:0.5rem 0;margin-right:auto;width:90%;border:1px solid var(--border-subtle);background:rgba(0,242,254,0.03);border-left:3px solid var(--accent-cyan);border-radius:4px 16px 16px 4px;padding:1.25rem;font-size:0.85rem;";
 
   card.innerHTML = `
-    <div class="font-bold text-brand-600 mb-2 flex items-center justify-between text-[11px] uppercase tracking-wider">
-      <span>📋 Medical Triage Analysis</span>
-      <span class="px-2 py-0.5 rounded text-white font-semibold ${urgencyColors[data.urgency]}">${data.urgency}</span>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
+      <span class="label-micro" style="color:var(--accent-cyan);">📋 Triage Analysis</span>
+      <span class="badge ${urgencyClass[data.urgency] || ''}" style="border:1px solid;">${data.urgency}</span>
     </div>
-    <div class="text-xs text-slate-600 space-y-2 mt-3">
-      <p><strong class="text-slate-800">Specialist Needed:</strong> ${esc(data.specializations.join(", "))}</p>
-      <p><strong class="text-slate-800">Home Advice:</strong> ${esc(data.home_advice)}</p>
+    <div style="color:var(--text-secondary);display:flex;flex-direction:column;gap:0.4rem;">
+      <p><strong style="color:white;">Specialist:</strong> ${esc(data.specializations.join(", "))}</p>
+      <p><strong style="color:white;">Advice:</strong> ${esc(data.home_advice)}</p>
     </div>
   `;
 
@@ -196,10 +203,11 @@ function addTriageDoctorSuggestions(doctors) {
   if (!container) return;
 
   const div = document.createElement("div");
-  div.className = "self-start w-[90%] my-2 space-y-2";
+  div.style.cssText = "margin-right:auto;width:90%;margin:0.5rem 0;display:flex;flex-direction:column;gap:0.5rem;";
 
   const label = document.createElement("div");
-  label.className = "text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2";
+  label.className = "label-micro";
+  label.style.marginBottom = "0.5rem";
   label.textContent = "Recommended Specialists:";
   div.appendChild(label);
 
@@ -208,24 +216,20 @@ function addTriageDoctorSuggestions(doctors) {
     window.doctorCache[doc._id] = doc.availability || {};
 
     const card = document.createElement("div");
-    card.className = "glass-card p-4 shadow-sm hover:border-brand-500 transition-all flex items-center justify-between";
+    card.className = "tech-card";
+    card.style.cssText = "padding:1rem;display:flex;align-items:center;justify-content:space-between;gap:0.75rem;";
 
     card.innerHTML = `
-      <div class="flex items-center gap-3">
-        <span class="text-2xl">👨‍⚕️</span>
-        <div>
-          <h4 class="font-bold text-slate-900 text-sm">${esc(doc.name)}</h4>
-          <p class="text-xs font-medium text-brand-600 mt-0.5">${esc(doc.specialization)} • ${esc(doc.location)}</p>
-          <div class="flex items-center gap-1 mt-1">
-            <span class="text-amber-400 text-xs">★</span>
-            <span class="text-xs font-bold text-slate-500">${doc.rating || "4.5"}</span>
-          </div>
+      <div style="display:flex;align-items:center;gap:0.75rem;min-width:0;">
+        <div style="width:40px;height:40px;border-radius:50%;background:rgba(0,242,254,0.06);border:1px solid rgba(0,242,254,0.15);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">👨‍⚕️</div>
+        <div style="min-width:0;">
+          <h4 style="font-weight:800;color:white;font-size:0.9rem;">${esc(doc.name)}</h4>
+          <p style="font-size:0.75rem;font-weight:700;color:var(--accent-cyan);margin-top:2px;">${esc(doc.specialization)} • ${esc(doc.location)}</p>
+          <span style="font-size:0.7rem;color:var(--accent-teal);">★ ${doc.rating || "4.5"}</span>
         </div>
       </div>
-      <button onclick="openBooking('${doc._id}', '${esc(doc.name)}', window.doctorCache['${doc._id}'])" 
-        class="btn-primary font-bold px-3 py-1.5 rounded-lg text-xs shadow-sm">
-        Book
-      </button>
+      <button onclick="window.location.href='/doctor-profile.html?id=${doc._id}&patient_name=${encodeURIComponent(triagePatientName)}&symptoms=${encodeURIComponent(latestSymptoms)}'" 
+        class="btn btn-primary" style="flex-shrink:0;padding:0.5rem 1rem;">Book</button>
     `;
     div.appendChild(card);
   });
@@ -242,12 +246,14 @@ function addTriageTypingIndicator() {
   const id = "triage-typing-" + Date.now();
   const indicator = document.createElement("div");
   indicator.id = id;
-  indicator.className = "self-start mr-auto bg-brand-50 border border-brand-100 text-brand-600 px-4 py-3 rounded-2xl rounded-bl-sm text-sm shadow-sm w-20";
+  indicator.className = "chat-bubble-ai";
+  indicator.style.cssText = "margin-right:auto;padding:1rem 1.25rem;max-width:80%;font-size:0.85rem;display:flex;align-items:center;gap:0.75rem;";
   indicator.innerHTML = `
-    <div class="flex gap-1.5 justify-center items-center h-4">
-      <span class="w-1.5 h-1.5 bg-brand-500 rounded-full typing-dot"></span>
-      <span class="w-1.5 h-1.5 bg-brand-500 rounded-full typing-dot"></span>
-      <span class="w-1.5 h-1.5 bg-brand-500 rounded-full typing-dot"></span>
+    <span class="label-micro" style="color:var(--accent-cyan);">System AI</span>
+    <div class="typing-indicator">
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
     </div>`;
 
   container.appendChild(indicator);

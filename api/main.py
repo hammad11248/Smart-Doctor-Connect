@@ -4,7 +4,13 @@ Handles app lifecycle, CORS, rate limiting, and router registration.
 """
 
 import os
+import sys
 from contextlib import asynccontextmanager
+
+# ─────────────────────────────────────────────────────────────
+# Path Configuration for Direct Execution
+# ─────────────────────────────────────────────────────────────
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -111,6 +117,16 @@ app.include_router(
 )
 
 # ─────────────────────────────────────────────────────────────
+# Health Check
+# ─────────────────────────────────────────────────────────────
+@app.get("/api/health", tags=["Health"])
+async def health_check():
+    return {
+        "status": "ok",
+        "environment": ENVIRONMENT
+    }
+
+# ─────────────────────────────────────────────────────────────
 # Static Files
 # ─────────────────────────────────────────────────────────────
 if ENVIRONMENT == "development":
@@ -121,11 +137,8 @@ if ENVIRONMENT == "development":
     )
 
 # ─────────────────────────────────────────────────────────────
-# Health Check
+# Direct Execution Support
 # ─────────────────────────────────────────────────────────────
-@app.get("/api/health", tags=["Health"])
-async def health_check():
-    return {
-        "status": "ok",
-        "environment": ENVIRONMENT
-    }
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("api.main:app", host="0.0.0.0", port=8000, reload=True)

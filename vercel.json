@@ -4,12 +4,40 @@
     {
       "src": "api/main.py",
       "use": "@vercel/python"
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
       "dest": "api/main.py"
+    },
+    {
+      "src": "/css/(.*)",
+      "dest": "/public/css/$1"
+    },
+    {
+      "src": "/js/(.*)",
+      "dest": "/public/js/$1"
+    },
+    {
+      "src": "/doctor-dashboard.html",
+      "dest": "/public/doctor-dashboard.html"
+    },
+    {
+      "src": "/doctor-profile.html",
+      "dest": "/public/doctor-profile.html"
+    },
+    {
+      "src": "/(.*\\.html)",
+      "dest": "/public/$1"
+    },
+    {
+      "src": "/(.*\\.ico|.*\\.png|.*\\.jpg|.*\\.svg|.*\\.webp)",
+      "dest": "/public/$1"
     },
     {
       "src": "/(.*)",

@@ -130,11 +130,8 @@ function addChatBubble(text, type, sender) {
   const bubble = document.createElement("div");
   const isPatient = type === "patient";
 
-  bubble.className = `max-w-[80%] p-3.5 rounded-2xl text-sm leading-relaxed shadow-md ${
-    isPatient
-      ? "bg-violet-900/40 text-violet-50 border border-violet-500/30 self-end ml-auto rounded-br-sm"
-      : "bg-cyan-900/40 text-cyan-50 border border-cyan-500/30 self-start mr-auto rounded-bl-sm"
-  }`;
+  bubble.style.cssText = `max-width:80%;padding:1rem 1.25rem;font-size:0.85rem;line-height:1.6;${isPatient ? 'margin-left:auto;' : 'margin-right:auto;'}`;
+  bubble.className = isPatient ? 'chat-bubble-user' : 'chat-bubble-ai';
 
   const timeStr = new Date().toLocaleTimeString("en-US", {
     hour: "numeric",
@@ -142,9 +139,9 @@ function addChatBubble(text, type, sender) {
   });
 
   bubble.innerHTML = `
-    <div class="flex items-center gap-1.5 mb-1 opacity-70">
-      <span class="text-[10px] font-black uppercase tracking-wider">${esc(sender)}</span>
-      <span class="text-[9px] opacity-60">${timeStr}</span>
+    <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.4rem;opacity:0.8;">
+      <span style="font-weight:800;font-size:0.6rem;text-transform:uppercase;letter-spacing:0.1em;color:${isPatient ? 'white' : 'var(--accent-cyan)'}">${esc(sender)}</span>
+      <span style="font-size:0.55rem;opacity:0.6;">${timeStr}</span>
     </div>
     <p>${esc(text)}</p>
   `;
@@ -161,16 +158,14 @@ function addTypingIndicator() {
   const id = "typing-" + Date.now();
   const indicator = document.createElement("div");
   indicator.id = id;
-  indicator.className =
-    "self-start mr-auto bg-cyan-900/40 border border-cyan-500/30 text-cyan-400 px-4 py-3 rounded-2xl rounded-bl-sm text-sm shadow-md";
+  indicator.className = "chat-bubble-ai";
+  indicator.style.cssText = "margin-right:auto;padding:1rem 1.25rem;max-width:80%;font-size:0.85rem;display:flex;align-items:center;gap:0.75rem;";
   indicator.innerHTML = `
-    <div class="flex items-center gap-1">
-      <span class="text-[10px] font-black uppercase tracking-wider opacity-70">AI Receptionist</span>
-    </div>
-    <div class="flex gap-1.5 mt-2">
-      <span class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce" style="animation-delay:0ms"></span>
-      <span class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce" style="animation-delay:150ms"></span>
-      <span class="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce" style="animation-delay:300ms"></span>
+    <span class="label-micro" style="color:var(--accent-cyan);">System AI</span>
+    <div class="typing-indicator">
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
     </div>`;
 
   container.appendChild(indicator);
@@ -247,6 +242,23 @@ async function finishChatAndSummarize() {
     const data = await resp.json();
     showToast("✅ Triage summary successfully linked to appointment!");
 
+    // Agentic workflow: autofill the Quick Booking Form
+    const qbName = document.getElementById("qbName");
+    const qbContact = document.getElementById("qbContact");
+    const qbSymptoms = document.getElementById("qbSymptoms");
+    const chatContact = document.getElementById("chatContact");
+
+    if (qbName && name) qbName.value = name;
+    if (qbContact && chatContact?.value) qbContact.value = chatContact.value;
+    if (qbSymptoms && data.triage_summary) {
+      qbSymptoms.value = data.triage_summary;
+      // Visually flash the symptoms field to show sync
+      qbSymptoms.classList.add("border-accentTeal", "shadow-neonTeal");
+      setTimeout(() => {
+        qbSymptoms.classList.remove("border-accentTeal", "shadow-neonTeal");
+      }, 1500);
+    }
+
     // Agentic Doctor Matching
     const matchResp = await fetch(`${API_BASE}/agents/match-doctor`, {
       method: "POST",
@@ -275,20 +287,21 @@ function displayAgentRecommendations(matchData) {
   if (!container) return;
 
   const bubble = document.createElement("div");
-  bubble.className = "self-start bg-brand-50 border border-brand-100 text-slate-800 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%] shadow-sm";
+  bubble.className = "chat-bubble-ai";
+  bubble.style.cssText = "margin-right:auto;padding:1rem 1.25rem;max-width:85%;";
   
   let docsHtml = matchData.doctors.map(d => {
-    return `<div class="bg-white p-3 rounded-xl mt-2 border border-slate-200 shadow-sm">
-      <p class="text-sm font-bold text-slate-900">${d.name}</p>
-      <p class="text-xs font-medium text-brand-600">${d.specialization} • ${d.location}</p>
+    return `<div class="tech-card" style="padding:1rem;margin-top:0.75rem;">
+      <p style="font-weight:800;color:white;font-size:0.85rem;">${d.name}</p>
+      <p style="font-size:0.75rem;font-weight:700;color:var(--accent-cyan);margin-top:0.25rem;">${d.specialization} • ${d.location}</p>
     </div>`;
   }).join("");
 
   bubble.innerHTML = `
-    <div class="flex items-center gap-1.5 mb-1.5">
-      <span class="text-[10px] font-bold tracking-widest uppercase text-brand-600">Agent Specialist Matching</span>
+    <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.4rem;opacity:0.8;">
+      <span class="label-micro" style="color:var(--accent-cyan);">Agent Specialist Matching</span>
     </div>
-    <p class="text-sm leading-relaxed mb-2 text-slate-700">${matchData.reasoning}</p>
+    <p style="font-size:0.85rem;line-height:1.6;margin-bottom:0.75rem;color:var(--text-secondary);">${matchData.reasoning}</p>
     ${docsHtml}
   `;
   

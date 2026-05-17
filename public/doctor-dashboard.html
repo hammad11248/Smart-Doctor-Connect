@@ -1,339 +1,296 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Smart Doctor Connect — Clinical Operations Panel</title>
-  
+  <meta name="description" content="Manage your medical practice, register credentials, configure availability slots, and review AI triage summaries." />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            display: ['Outfit', 'sans-serif'],
-          },
-          colors: {
-            brand: {
-              50: '#eff6ff',
-              100: '#dbeafe',
-              500: '#3b82f6',
-              600: '#2563eb',
-              900: '#1e3a8a',
-            },
-            teal: {
-              500: '#14b8a6',
-              600: '#0d9488',
-            }
-          }
-        }
-      }
-    }
-  </script>
-  
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/design-system.css">
+
   <style>
-    body {
-      background-color: #f8fafc;
-      color: #334155;
-    }
-    
-    .glass-card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-      border-radius: 16px;
-      transition: all 0.2s ease-in-out;
-    }
-    .glass-card:hover {
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-      transform: translateY(-2px);
-    }
-
-    .input-field {
-      width: 100%;
-      border: 1px solid #cbd5e1;
-      border-radius: 12px;
-      padding: 0.75rem 1rem;
-      font-size: 0.875rem;
-      font-weight: 500;
-      outline: none;
-      color: #1e293b;
-      background-color: #ffffff;
-      transition: all 0.2s ease;
-    }
-    .input-field:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-    }
-
-    .btn-primary {
-      background: #2563eb;
-      color: white;
-      transition: all 0.2s ease-in-out;
-      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
-    }
-    .btn-primary:hover {
-      background: #1d4ed8;
-      box-shadow: 0 6px 8px -1px rgba(37, 99, 235, 0.3);
-      transform: translateY(-1px);
-    }
-
-    .slot-btn {
-      padding: 0.5rem 0.9rem;
-      border-radius: 8px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      border: 1px solid #cbd5e1;
-      cursor: pointer;
-      background-color: #ffffff;
-      color: #475569;
-      transition: all 0.2s ease;
-    }
-    .slot-btn.active {
-      background: #2563eb;
-      color: white;
-      border-color: #2563eb;
-      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
-    }
-    .slot-btn:hover:not(.active) {
-      border-color: #3b82f6;
-      color: #2563eb;
-      background-color: #eff6ff;
-    }
-    
-    .tab-btn {
-      transition: all 0.2s ease-in-out;
-    }
-    .tab-btn.active {
-      background: #2563eb;
-      color: white;
-      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
-    }
+    .reg-form-grid { display: flex; flex-direction: column; gap: 1.15rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } }
+    .field-label { display: block; margin-bottom: 0.4rem; }
+    .avail-day { padding: 1rem; border-radius: var(--radius-md); background: var(--bg-input); border: 1px solid var(--border-subtle); }
+    .avail-day__title { font-size: 0.8rem; font-weight: 800; color: white; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    .avail-day__slots { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .stat-card { background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem; text-align: center; }
+    .stat-card__label { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
+    .stat-card__value { font-size: 1.75rem; font-weight: 900; font-family: var(--font-display); margin-top: 0.25rem; color: white; }
+    .queue-card { cursor: pointer; position: relative; }
+    .queue-card__hover-hint { position: absolute; top: 1rem; right: 1rem; opacity: 0; transition: var(--transition-smooth); font-size: 0.6rem; font-weight: 800; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.08em; background: var(--bg-input); border: 1px solid var(--border-subtle); padding: 0.3rem 0.6rem; border-radius: 8px; }
+    .queue-card:hover .queue-card__hover-hint { opacity: 1; }
+    .queue-meta-pill { display: inline-flex; align-items: center; gap: 0.3rem; background: var(--bg-input); border: 1px solid var(--border-subtle); padding: 0.3rem 0.6rem; border-radius: 8px; font-size: 0.6rem; font-weight: 800; color: var(--text-secondary); }
+    .doctor-list-item { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.85rem 1rem; }
+    .registry-panel { height: 680px; display: flex; flex-direction: column; }
+    .registry-scroll { flex: 1; overflow-y: auto; padding-right: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
   </style>
 </head>
 
-<body class="antialiased min-h-screen relative font-sans">
-  
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-brand-500 flex items-center justify-center shadow-md">
-          <span class="text-white text-xl">⚕️</span>
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a href="/" class="site-header__logo">
+        <div class="site-header__logo-icon">
+          <div class="site-header__logo-icon-inner"><span class="text-gradient">SD</span></div>
         </div>
-        <div>
-          <span class="font-display font-bold text-xl text-slate-900 leading-none block">Smart Doctor</span>
-          <span class="text-brand-600 font-bold text-[10px] uppercase tracking-widest block mt-0.5">Connect AI</span>
+        <div class="site-header__logo-text">
+          <span>Smart Doctor</span>
+          <span>Connect AI</span>
         </div>
       </a>
-      <nav class="flex items-center gap-4 text-sm font-semibold">
-        <a href="/index.html" class="text-slate-500 hover:text-slate-900 transition-colors">Directory</a>
-        <a href="/doctor-dashboard.html" class="text-brand-600 bg-brand-50 px-4 py-2 rounded-lg">For Doctors</a>
+      <nav class="site-nav">
+        <a href="/index.html" class="site-nav__link">Directory & Triage</a>
+        <a href="/doctor-dashboard.html" class="site-nav__link site-nav__link--active">Clinical Operations</a>
       </nav>
     </div>
   </header>
 
-  <section class="max-w-5xl mx-auto px-6 pt-12 pb-8 text-center">
-    <h1 class="font-display text-4xl font-bold text-slate-900 mb-3">Practice Management</h1>
-    <p class="text-slate-500 text-sm max-w-xl mx-auto font-medium">Register your profile, manage active slots, and analyze AI triage records.</p>
+  <!-- Hero -->
+  <section class="section-hero">
+    <div class="container text-center">
+      <div style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.4rem 1rem;border-radius:999px;background:rgba(0,242,254,0.06);border:1px solid rgba(0,242,254,0.15);font-size:0.7rem;font-weight:700;color:var(--accent-cyan);margin-bottom:1.25rem;">
+        <span class="badge-dot badge-dot--pulse" style="color:var(--accent-cyan);"></span> Clinical Practice Node Active
+      </div>
+      <h1 style="color:white;max-width:600px;margin:0 auto 1rem;">Practice & Clinical Queue Panel</h1>
+      <p style="max-width:520px;margin:0 auto;font-size:0.9rem;">Configure your consultation blocks, monitor queue positions, and review real-time AI triage summaries.</p>
+    </div>
   </section>
 
-  <div class="max-w-5xl mx-auto px-6 mb-8">
-    <div class="bg-white border border-slate-200 p-2 rounded-2xl shadow-sm flex gap-2">
-      <button onclick="switchTab('register')" id="tab-register" class="tab-btn active flex-1 py-3 text-sm font-bold rounded-xl text-center">
-        Register Practice
-      </button>
-      <button onclick="switchTab('scheduling')" id="tab-scheduling" class="tab-btn flex-1 py-3 text-sm font-bold rounded-xl text-slate-500 hover:text-slate-900 text-center">
-        Queue & Triage Matrix
-      </button>
+  <!-- Tab Selector Panel -->
+  <div class="container" style="margin-bottom:2rem;">
+    <div style="background:var(--bg-input);border:1px solid var(--border-subtle);padding:0.5rem;border-radius:var(--radius-md);display:flex;gap:0.5rem;">
+      <button onclick="switchTab('register')" id="tab-register" class="tab-btn active">Register Practice</button>
+      <button onclick="switchTab('scheduling')" id="tab-scheduling" class="tab-btn">Queue & Triage Matrix</button>
     </div>
   </div>
 
-  <main class="max-w-5xl mx-auto px-6 pb-20">
+  <!-- Workspace Container -->
+  <main class="container" style="padding-bottom:4rem;">
     
-    <!-- REGISTER -->
-    <div id="section-register" class="space-y-6">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <div class="glass-card p-8 lg:col-span-2">
-          <h2 class="font-display text-xl font-bold text-slate-900 mb-6 border-b border-slate-100 pb-4">Register New Profile</h2>
-          <form id="registerForm" class="space-y-5">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+    <!-- SECTION 1: REGISTER PRACTICE -->
+    <div id="section-register" class="space-y-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Left Side: Registration Form (8 Cols) -->
+        <div class="glass-panel p-6 sm:p-8 lg:col-span-8">
+          <h2 class="font-display text-2xl font-black text-white mb-6 border-b border-white/5 pb-4">Create Digital Credential</h2>
+          
+          <form id="registerForm" class="space-y-5 text-xs font-semibold">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Full Name *</label>
-                <input id="docName" type="text" placeholder="Dr. Sara Ahmed" class="input-field" required />
+                <label class="block text-[10px] text-slate-400 uppercase tracking-wider mb-1.5">Full Professional Name *</label>
+                <input id="docName" type="text" placeholder="Dr. Sara Ahmed" class="input-field font-semibold" required />
               </div>
               <div>
-                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Specialization *</label>
-                <input id="docSpec" type="text" placeholder="Cardiologist" class="input-field" required />
+                <label class="block text-[10px] text-slate-400 uppercase tracking-wider mb-1.5">Primary Specialization *</label>
+                <input id="docSpec" type="text" placeholder="Cardiologist" class="input-field font-semibold" required />
               </div>
             </div>
             
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">City Location *</label>
-                <input id="docLocation" type="text" placeholder="Lahore" class="input-field" required />
+                <label class="block text-[10px] text-slate-400 uppercase tracking-wider mb-1.5">Clinical Practice City *</label>
+                <input id="docLocation" type="text" placeholder="Lahore" class="input-field font-semibold" required />
               </div>
               <div>
-                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Consultation Type *</label>
-                <select id="docConsultType" class="input-field">
-                  <option value="both">Both (Online + Clinic)</option>
-                  <option value="online">Online Only</option>
-                  <option value="in_person">In-Person Only</option>
+                <label class="block text-[10px] text-slate-400 uppercase tracking-wider mb-1.5">Consultation Format *</label>
+                <select id="docConsultType" class="input-field font-semibold">
+                  <option value="both">Both (Online Call + Clinic Visit)</option>
+                  <option value="online">Online Consultation Only</option>
+                  <option value="in_person">In-Person Clinic Only</option>
                 </select>
               </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Email Address *</label>
-                <input id="docEmail" type="email" placeholder="sara@example.com" class="input-field" required />
+                <label class="block text-[10px] text-slate-400 uppercase tracking-wider mb-1.5">Clinical Email Address *</label>
+                <input id="docEmail" type="email" placeholder="sara@example.com" class="input-field font-semibold" required />
               </div>
               <div>
-                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Phone Contact *</label>
-                <input id="docPhone" type="tel" placeholder="+92 300 1234567" class="input-field" required />
+                <label class="block text-[10px] text-slate-400 uppercase tracking-wider mb-1.5">Direct Phone Contact *</label>
+                <input id="docPhone" type="tel" placeholder="+92 300 1234567" class="input-field font-semibold" required />
               </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Practice Experience (Yrs) *</label>
-                <input id="docExperience" type="number" min="0" placeholder="10" class="input-field" required />
+                <label class="block text-[10px] text-slate-400 uppercase tracking-wider mb-1.5">Clinical Experience (Years) *</label>
+                <input id="docExperience" type="number" min="0" placeholder="10" class="input-field font-semibold" required />
               </div>
               <div>
-                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Consultation Fee (PKR) *</label>
-                <input id="docFee" type="number" min="0" placeholder="2000" class="input-field" required />
+                <label class="block text-[10px] text-slate-400 uppercase tracking-wider mb-1.5">Consultation Fee (PKR) *</label>
+                <input id="docFee" type="number" min="0" placeholder="2000" class="input-field font-semibold" required />
               </div>
             </div>
 
             <div>
-              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Short Bio</label>
-              <textarea id="docBio" placeholder="Brief details about specialties..." class="input-field resize-none h-20"></textarea>
+              <label class="block text-[10px] text-slate-400 uppercase tracking-wider mb-1.5">Professional Medical Biography</label>
+              <textarea id="docBio" placeholder="Brief clinical briefing, research specialties or hospital affiliations..." class="input-field resize-none h-20 font-medium"></textarea>
             </div>
 
-            <div class="border-t border-slate-100 pt-6">
-              <label class="text-sm font-bold text-slate-900 mb-1 block">Clinical Calendar</label>
-              <p class="text-xs text-slate-500 mb-4">Select availability blocks.</p>
-              <div id="availabilityPicker" class="space-y-4 max-h-[300px] overflow-y-auto pr-2"></div>
+            <div class="border-t border-white/5 pt-6 mt-4">
+              <h3 class="text-base font-extrabold text-white mb-1">Clinical Calendar Availability</h3>
+              <p class="text-xs text-slate-400 mb-4">Highlight active days and session slot timings.</p>
+              
+              <div id="availabilityPicker" class="space-y-4 max-h-[300px] overflow-y-auto pr-2 scroll-smooth">
+                <!-- Populated dynamically by script -->
+              </div>
             </div>
 
-            <button type="submit" class="w-full btn-primary font-bold py-3.5 rounded-xl text-sm shadow-md mt-6">
-              Publish Profile
+            <button type="submit" class="w-full btn-tech font-bold py-4 rounded-xl text-xs uppercase tracking-widest mt-6">
+              Publish Clinical Profile
             </button>
           </form>
         </div>
 
-        <div class="glass-card p-6">
-          <h3 class="font-display font-bold text-lg text-slate-900 mb-4">Node Directory</h3>
-          <div id="doctorList" class="space-y-3 max-h-[500px] overflow-y-auto pr-2">
-            <p class="text-sm text-slate-500">Loading directory...</p>
+        <!-- Right Side: Registry Directory (4 Cols) -->
+        <div class="glass-panel p-6 lg:col-span-4 flex flex-col h-[750px] relative overflow-hidden">
+          <div class="pb-4 border-b border-white/5 mb-4">
+            <h3 class="font-display font-extrabold text-lg text-white">Registered Registry</h3>
+            <p class="text-xs text-slate-400 mt-0.5">List of active clinical provider nodes.</p>
+          </div>
+          
+          <div id="doctorList" class="flex-1 overflow-y-auto space-y-3 pr-2 scroll-smooth">
+            <!-- Dynamic listing -->
           </div>
         </div>
+
       </div>
     </div>
 
-    <!-- SCHEDULING -->
-    <div id="section-scheduling" class="hidden space-y-6">
-      <div class="glass-card p-8">
-        <h3 class="font-display font-bold text-xl text-slate-900 mb-6 border-b border-slate-100 pb-4">Schedule & Triage Matrix</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+    <!-- SECTION 2: SCHEDULING MATRIX -->
+    <div id="section-scheduling" class="hidden space-y-8">
+      
+      <!-- Top Filters & Stats Matrix -->
+      <div class="glass-panel p-6 sm:p-8">
+        <h3 class="font-display font-black text-2xl text-white mb-6 border-b border-white/5 pb-4">Schedule Operations</h3>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold">
           <div>
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Active Doctor</label>
-            <select id="schedDocSelect" class="input-field" onchange="loadScheduleView()">
-              <option value="">— Choose a doctor —</option>
+            <label class="block text-[10px] text-slate-400 uppercase tracking-wider mb-1.5">Select Clinical Provider</label>
+            <select id="schedDocSelect" class="input-field font-semibold" onchange="loadScheduleView()">
+              <option value="">— Choose a specialist —</option>
             </select>
           </div>
           <div>
-            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Operations Date</label>
-            <input id="schedDate" type="date" class="input-field" onchange="loadScheduleView()" />
+            <label class="block text-[10px] text-slate-400 uppercase tracking-wider mb-1.5">Operational Date</label>
+            <input id="schedDate" type="date" class="input-field font-semibold" onchange="loadScheduleView()" />
           </div>
         </div>
 
-        <div id="schedStats" class="hidden grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 border-t border-slate-100 pt-8">
-          <div class="bg-brand-50 border border-brand-100 rounded-xl p-4 text-center">
-            <p class="text-[10px] font-bold text-brand-600 uppercase tracking-wider">Total Slots</p>
-            <p class="text-2xl font-bold text-slate-900 mt-1" id="statTotal">0</p>
+        <!-- Stats Grid -->
+        <div id="schedStats" class="hidden grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 border-t border-white/5 pt-8">
+          <div class="bg-deep/80 border border-white/5 rounded-2xl p-5 text-center shadow-inner">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Configured Slots</p>
+            <p class="text-3xl font-display font-black text-white mt-1.5" id="statTotal">0</p>
           </div>
-          <div class="bg-brand-50 border border-brand-100 rounded-xl p-4 text-center">
-            <p class="text-[10px] font-bold text-brand-600 uppercase tracking-wider">Available Slots</p>
-            <p class="text-2xl font-bold text-slate-900 mt-1" id="statFree">0</p>
+          <div class="bg-deep/80 border border-white/5 rounded-2xl p-5 text-center shadow-inner">
+            <p class="text-[9px] font-black text-accentTeal uppercase tracking-wider">Unbooked Slots</p>
+            <p class="text-3xl font-display font-black text-accentTeal mt-1.5" id="statFree">0</p>
           </div>
-          <div class="bg-brand-50 border border-brand-100 rounded-xl p-4 text-center">
-            <p class="text-[10px] font-bold text-brand-600 uppercase tracking-wider">Booked slots</p>
-            <p class="text-2xl font-bold text-slate-900 mt-1" id="statBooked">0</p>
+          <div class="bg-deep/80 border border-white/5 rounded-2xl p-5 text-center shadow-inner border-accentCoral/20">
+            <p class="text-[9px] font-black text-accentCoral uppercase tracking-wider">Booked Queue</p>
+            <p class="text-3xl font-display font-black text-accentCoral mt-1.5" id="statBooked">0</p>
           </div>
-          <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-center">
-            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Est. Triage Wait</p>
-            <p class="text-2xl font-bold text-slate-900 mt-1" id="statWait">—</p>
+          <div class="bg-deep/80 border border-white/5 rounded-2xl p-5 text-center shadow-inner border-accentCyan/20">
+            <p class="text-[9px] font-black text-accentCyan uppercase tracking-wider">Est. Clinic Delay</p>
+            <p class="text-3xl font-display font-black text-accentCyan mt-1.5" id="statWait">—</p>
           </div>
         </div>
 
-        <div id="slotGrid" class="hidden mt-8 border-t border-slate-100 pt-8">
-          <h4 class="text-sm font-bold text-slate-900 mb-4">Clock Slot Activity</h4>
-          <div id="slotVisual" class="flex flex-wrap gap-2.5 mb-4"></div>
+        <!-- Slot activity timeline -->
+        <div id="slotGrid" class="hidden mt-8 border-t border-white/5 pt-8">
+          <h4 class="text-sm font-extrabold text-white mb-4 uppercase tracking-wider">Clock Activity Timeline</h4>
+          <div id="slotVisual" class="flex flex-wrap gap-2.5">
+            <!-- Slot blocks -->
+          </div>
         </div>
       </div>
 
-      <div id="schedApptsWrap" class="hidden glass-card p-8">
-        <h3 class="font-display font-bold text-xl text-slate-900 mb-6 border-b border-slate-100 pb-4">Clinical Queue</h3>
-        <div id="schedApptsList" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+      <!-- Clinical Appointments Queue Grid -->
+      <div id="schedApptsWrap" class="hidden glass-panel p-6 sm:p-8">
+        <div class="pb-4 border-b border-white/5 mb-6">
+          <h3 class="font-display font-black text-2xl text-white">Active Queue</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Click any queue card to synchronize the AI triage briefing and suggested clinical orders.</p>
+        </div>
+        
+        <div id="schedApptsList" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Queue cards -->
+        </div>
       </div>
+
     </div>
 
   </main>
 
-  <div id="briefingModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm px-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 relative">
-      <button onclick="closeBriefingModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-900 text-2xl transition-colors">&times;</button>
+  <!-- Interactive Clinician Triage Briefing Terminal Modal -->
+  <div id="briefingModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-deep/90 backdrop-blur-md px-4 sm:px-6">
+    <div class="glass-panel shadow-2xl w-full max-w-2xl p-6 sm:p-8 relative border-accentCyan/30">
       
-      <div class="flex items-center gap-4 mb-6 border-b border-slate-100 pb-4">
-        <div class="w-12 h-12 rounded-full bg-brand-100 flex items-center justify-center text-xl shadow-inner border border-brand-200">🧠</div>
+      <!-- Close button -->
+      <button onclick="closeBriefingModal()" class="absolute top-5 right-5 text-slate-400 hover:text-white text-2xl transition-colors font-semibold">&times;</button>
+      
+      <div class="flex items-center gap-4 mb-6 pb-4 border-b border-white/5">
+        <div class="w-12 h-12 rounded-xl bg-accentCyan/10 border border-accentCyan/20 flex items-center justify-center text-2xl shadow-inner animate-pulse">🧠</div>
         <div class="flex-1">
-          <h3 class="font-display font-bold text-lg text-slate-900 leading-none mb-1">End-to-End Briefing</h3>
-          <p class="text-sm text-brand-600 font-semibold" id="briefName">—</p>
+          <h3 class="font-display font-extrabold text-xl text-white">AI Diagnostic Briefing</h3>
+          <p class="text-xs text-accentCyan font-bold tracking-wider uppercase mt-1" id="briefName">—</p>
         </div>
-        <span id="briefPriority" class="text-[10px] font-bold tracking-widest uppercase px-3 py-1.5 rounded-full bg-slate-100 text-slate-600">NORMAL</span>
+        <span id="briefPriority" class="text-[9px] font-black tracking-widest uppercase px-3 py-1 rounded-full bg-deep border">NORMAL</span>
       </div>
 
-      <div class="space-y-6 mb-8">
-        <div class="grid grid-cols-2 gap-4 text-sm">
-          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Time Slot</p>
-            <p class="font-bold text-slate-900" id="briefSlot">—</p>
+      <div class="space-y-5 text-xs font-semibold mb-6">
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-deep/80 p-4 rounded-xl border border-white/5 shadow-inner">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">Time Slot Assignment</p>
+            <p class="font-extrabold text-white text-base" id="briefSlot">—</p>
           </div>
-          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Contact</p>
-            <p class="font-bold text-slate-900" id="briefContact">—</p>
+          <div class="bg-deep/80 p-4 rounded-xl border border-white/5 shadow-inner">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">Patient Phone Contact</p>
+            <p class="font-extrabold text-white text-base" id="briefContact">—</p>
           </div>
         </div>
         
         <div>
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">AI Triage Summary</label>
-          <div class="bg-brand-50 border border-brand-100 rounded-xl p-5 text-sm text-slate-800 font-medium whitespace-pre-line leading-relaxed shadow-inner" id="briefSummary"></div>
+          <label class="block text-[10px] text-slate-400 uppercase tracking-wider mb-1.5">Interactive Triage Synopsis</label>
+          <div class="bg-deep/80 border border-accentCyan/20 rounded-xl p-5 text-slate-300 font-medium whitespace-pre-line leading-relaxed shadow-inner" id="briefSummary"></div>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Agent Suggested Actions</label>
-          <ul class="space-y-2 bg-slate-50 p-5 rounded-xl border border-slate-200 text-sm text-slate-700 font-medium" id="briefActions"></ul>
+          <label class="block text-[10px] text-slate-400 uppercase tracking-wider mb-1.5">AI Agent Suggested Clinical Actions</label>
+          <ul class="space-y-2 bg-deep/80 p-5 rounded-xl border border-white/5 text-slate-300 font-medium text-xs shadow-inner" id="briefActions"></ul>
         </div>
       </div>
 
-      <button id="briefCompleteBtn" class="w-full btn-primary font-bold py-3.5 rounded-xl text-sm shadow-md">Mark Completed</button>
+      <div class="flex gap-3">
+        <button onclick="closeBriefingModal()" class="btn-outline flex-1 py-3 rounded-xl font-bold uppercase tracking-wider text-xs">
+          Dismiss Briefing
+        </button>
+        <button id="briefCompleteBtn" class="btn-tech flex-1 py-3 rounded-xl font-bold uppercase tracking-wider text-xs">
+          Mark Consultation Completed
+        </button>
+      </div>
     </div>
   </div>
 
-  <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-sm font-bold px-6 py-3 rounded-xl shadow-xl flex items-center gap-2"></div>
+  <!-- Shared Toast Alert -->
+  <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-cyan-950/80 border border-cyan-500/30 text-white text-xs font-bold px-6 py-3.5 rounded-full shadow-2xl flex items-center gap-2 backdrop-blur-md transition-all"></div>
 
+  <!-- JavaScript and Tab Logic -->
   <script src="/js/app.js"></script>
   <script>
     function switchTab(tab) {
-      document.getElementById("tab-register").className = "tab-btn flex-1 py-3 text-sm font-bold rounded-xl text-slate-500 hover:text-slate-900 text-center";
-      document.getElementById("tab-scheduling").className = "tab-btn flex-1 py-3 text-sm font-bold rounded-xl text-slate-500 hover:text-slate-900 text-center";
-      
-      document.getElementById(`tab-${tab}`).className = "tab-btn active flex-1 py-3 text-sm font-bold rounded-xl text-center";
+      document.getElementById("tab-register").className = "tab-btn";
+      document.getElementById("tab-scheduling").className = "tab-btn";
+      document.getElementById(`tab-${tab}`).className = "tab-btn active";
       
       document.getElementById("section-register").classList.add("hidden");
       document.getElementById("section-scheduling").classList.add("hidden");
@@ -353,8 +310,8 @@
       
       DAYS.forEach(day => {
         const div = document.createElement("div");
-        div.className = "bg-slate-50 border border-slate-200 rounded-xl p-4";
-        div.innerHTML = `<p class="text-sm font-bold text-slate-900 mb-3">${day}</p><div class="flex flex-wrap gap-2" id="slots-${day}"></div>`;
+        div.className = "bg-deep/80 border border-white/5 rounded-xl p-4";
+        div.innerHTML = `<p class="text-xs font-extrabold text-white mb-3 uppercase tracking-wider">${day}</p><div class="flex flex-wrap gap-2.5" id="slots-${day}"></div>`;
         container.appendChild(div);
         
         const slotContainer = div.querySelector(`#slots-${day}`);
@@ -421,25 +378,25 @@
         c.innerHTML = allDoctors.length ? allDoctors.map(d => {
           const id = d._id || d.id;
           return `
-            <div class="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between gap-3 shadow-sm hover:border-brand-300 transition-all">
+            <div class="tech-card p-4 flex items-center justify-between gap-4 shadow-sm">
               <div class="min-w-0">
-                <h4 class="font-bold text-slate-900 text-sm truncate">${esc(d.name)}</h4>
-                <p class="text-xs font-medium text-brand-600 truncate mt-0.5">${esc(d.specialization)}</p>
-                <p class="text-xs text-slate-500 font-medium truncate mt-0.5">📍 ${esc(d.location)}</p>
+                <h4 class="font-extrabold text-white text-sm truncate">${esc(d.name)}</h4>
+                <p class="text-[10px] font-black text-accentCyan truncate mt-0.5">${esc(d.specialization)}</p>
+                <p class="text-[10px] text-slate-400 font-medium truncate mt-0.5">📍 ${esc(d.location)}</p>
               </div>
-              <a href="/doctor-profile.html?id=${id}" class="text-xs px-4 py-2 rounded-lg bg-brand-50 text-brand-600 hover:bg-brand-100 transition-colors font-bold border border-brand-200">Profile</a>
+              <a href="/doctor-profile.html?id=${id}" class="text-[10px] px-3.5 py-2.5 rounded-xl bg-deep text-accentCyan hover:bg-borderOutline transition-colors font-bold border border-white/5">Profile</a>
             </div>`;
-        }).join("") : '<p class="text-sm text-slate-500 font-medium">No doctors registered yet.</p>';
+        }).join("") : '<p class="text-xs text-slate-500 font-medium">No doctors registered yet.</p>';
         populateDoctorDropdown();
       } catch (err) {
-        c.innerHTML = '<p class="text-sm text-red-500 font-medium">Failed to load directory.</p>';
+        c.innerHTML = '<p class="text-xs text-accentCoral font-medium">Failed to load directory.</p>';
       }
     }
 
     function populateDoctorDropdown() {
       const sel = document.getElementById("schedDocSelect");
       if (!sel) return;
-      sel.innerHTML = '<option value="">— Choose a doctor —</option>';
+      sel.innerHTML = '<option value="">— Choose a specialist —</option>';
       allDoctors.forEach(d => {
         const id = d._id || d.id;
         sel.innerHTML += `<option value="${id}">${esc(d.name)} — ${esc(d.specialization)}</option>`;
@@ -476,14 +433,14 @@
       const visualEl = document.getElementById("slotVisual");
       visualEl.innerHTML = "";
       if (total === 0) {
-        visualEl.innerHTML = `<p class="text-sm text-slate-500 font-medium">No schedules configured for ${data.day}.</p>`;
+        visualEl.innerHTML = `<p class="text-xs text-slate-400 font-medium">No schedules configured for ${data.day}.</p>`;
         return;
       }
       data.all_slots.forEach(slot => {
         const isBooked = data.booked_slots.includes(slot);
         const el = document.createElement("div");
-        el.className = `px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-sm ${
-          isBooked ? "bg-red-50 text-red-600 border border-red-200" : "bg-green-50 text-green-600 border border-green-200"
+        el.className = `px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-sm border ${
+          isBooked ? "bg-accentCoral/10 text-accentCoral border-accentCoral/20 shadow-neonCoral" : "bg-accentTeal/10 text-accentTeal border-accentTeal/20 shadow-neonTeal"
         }`;
         el.textContent = slot + (isBooked ? " ✗" : " ✓");
         visualEl.appendChild(el);
@@ -498,42 +455,45 @@
       wrap.classList.remove("hidden");
 
       if (!appts.length) {
-        list.innerHTML = `<div class="col-span-full text-center py-10"><p class="text-3xl mb-2">📅</p><p class="text-sm font-medium text-slate-500">No appointments scheduled for this date</p></div>`;
+        list.innerHTML = `<div class="col-span-full text-center py-12"><p class="text-4xl mb-3 opacity-70">📅</p><p class="text-xs font-bold text-slate-400">No appointments scheduled for this date</p></div>`;
         return;
       }
 
       const statusColors = {
-        confirmed: "bg-green-100 text-green-700",
-        pending: "bg-amber-100 text-amber-700",
-        cancelled: "bg-red-100 text-red-700",
-        completed: "bg-brand-100 text-brand-700"
+        confirmed: "bg-accentTeal/10 text-accentTeal border-accentTeal/20 shadow-neonTeal",
+        pending: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
+        cancelled: "bg-accentCoral/10 text-accentCoral border-accentCoral/20 shadow-neonCoral",
+        completed: "bg-accentCyan/10 text-accentCyan border-accentCyan/20 shadow-neonCyan"
       };
 
       list.innerHTML = appts.map((a, i) => {
         const id = a._id || a.id;
         const wait = a.predicted_wait_minutes != null ? a.predicted_wait_minutes : i * AVG_CONSULT;
         return `
-          <div onclick="openBriefingModal('${id}')" class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer relative group">
+          <div onclick="openBriefingModal('${id}')" class="tech-card p-5 shadow-sm cursor-pointer relative group">
             <div class="absolute right-5 top-5 opacity-0 group-hover:opacity-100 transition-opacity">
-              <span class="bg-brand-50 text-brand-600 px-2.5 py-1.5 rounded-lg text-[10px] font-bold border border-brand-200 shadow-sm">View Briefing ↗</span>
+              <span class="bg-deep border border-white/5 text-accentCyan px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider shadow-sm">View Briefing ↗</span>
             </div>
+            
             <div class="flex items-center justify-between mb-4">
               <div>
-                <h4 class="font-bold text-slate-900 text-sm">${esc(a.patient_name)}</h4>
-                <p class="text-xs text-slate-500 font-medium mt-0.5">${esc(a.patient_email)}</p>
-                <p class="text-xs text-slate-500 font-medium mt-0.5">📞 ${esc(a.patient_contact)}</p>
+                <h4 class="font-extrabold text-white text-base">${esc(a.patient_name)}</h4>
+                <p class="text-xs text-slate-400 font-medium mt-0.5">${esc(a.patient_email)}</p>
+                <p class="text-xs text-slate-400 font-medium mt-0.5">📞 ${esc(a.patient_contact)}</p>
               </div>
-              <span class="text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full ${statusColors[a.status] || 'bg-slate-100 text-slate-600'}">${a.status}</span>
+              <span class="text-[9px] font-black tracking-widest uppercase px-3 py-1 rounded-full border ${statusColors[a.status] || 'bg-deep text-slate-400 border-white/5'}">${a.status}</span>
             </div>
-            <div class="flex flex-wrap gap-2 text-[10px] font-bold text-slate-600 py-3 border-t border-b border-slate-100 my-4">
-              <span class="bg-slate-100 px-2.5 py-1 rounded-md">🕐 ${esc(a.time_slot)}</span>
-              <span class="bg-slate-100 px-2.5 py-1 rounded-md">🏥 ${esc(a.consultation_type)}</span>
-              <span class="bg-slate-100 px-2.5 py-1 rounded-md">📊 Queue Pos #${a.queue_position || i + 1}</span>
-              <span class="bg-brand-50 text-brand-600 px-2.5 py-1 rounded-md border border-brand-100">⏳ ~${wait}m wait</span>
+            
+            <div class="flex flex-wrap gap-2 text-[9px] font-black text-slate-300 py-3 border-t border-b border-white/5 my-4">
+              <span class="bg-deep border border-white/5 px-2.5 py-1 rounded-lg">🕐 ${esc(a.time_slot)}</span>
+              <span class="bg-deep border border-white/5 px-2.5 py-1 rounded-lg uppercase">Format: ${esc(a.consultation_type)}</span>
+              <span class="bg-deep border border-white/5 px-2.5 py-1 rounded-lg">Queue #${a.queue_position || i + 1}</span>
+              <span class="bg-accentCyan/10 text-accentCyan px-2.5 py-1 rounded-lg border border-accentCyan/20">⏳ ~${wait}m wait</span>
             </div>
+            
             <div class="flex gap-2">
-              ${a.status !== "completed" ? `<button onclick="event.stopPropagation(); updateApptStatus('${id}','completed')" class="text-[10px] font-bold px-4 py-2.5 rounded-lg bg-brand-50 text-brand-600 hover:bg-brand-100 transition-colors flex-1 shadow-sm border border-brand-200">Complete</button>` : ""}
-              ${a.status !== "cancelled" ? `<button onclick="event.stopPropagation(); updateApptStatus('${id}','cancelled')" class="text-[10px] font-bold px-4 py-2.5 rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-100 transition-colors flex-1 shadow-sm border border-slate-200">Cancel</button>` : ""}
+              ${a.status !== "completed" ? `<button onclick="event.stopPropagation(); updateApptStatus('${id}','completed')" class="text-[10px] font-bold px-4 py-2.5 rounded-xl bg-deep text-accentCyan hover:bg-white hover:text-deep transition-all flex-1 shadow-sm border border-white/5">Complete</button>` : ""}
+              ${a.status !== "cancelled" ? `<button onclick="event.stopPropagation(); updateApptStatus('${id}','cancelled')" class="text-[10px] font-bold px-4 py-2.5 rounded-xl bg-deep text-slate-500 hover:text-accentCoral hover:border-accentCoral/30 transition-all flex-1 shadow-sm border border-white/5">Cancel</button>` : ""}
             </div>
           </div>`;
       }).join("");
@@ -561,17 +521,17 @@
       const priorityEl = document.getElementById("briefPriority");
       const priority = appt.priority_level || "NORMAL";
       priorityEl.textContent = priority;
-      priorityEl.className = `text-[10px] font-bold tracking-widest uppercase px-3 py-1.5 rounded-full ${
-        priority === 'CRITICAL' ? 'bg-red-100 text-red-600 border border-red-200' :
-        priority === 'HIGH' ? 'bg-amber-100 text-amber-600 border border-amber-200' :
-        'bg-green-100 text-green-600 border border-green-200'
+      priorityEl.className = `text-[9px] font-black tracking-widest uppercase px-3 py-1 rounded-full border ${
+        priority === 'CRITICAL' ? 'bg-accentCoral/10 text-accentCoral border-accentCoral/20 shadow-neonCoral animate-pulse' :
+        priority === 'HIGH' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' :
+        'bg-accentTeal/10 text-accentTeal border-accentTeal/20 shadow-neonTeal'
       }`;
       
       const actionsEl = document.getElementById("briefActions");
       if (appt.suggested_actions && appt.suggested_actions.length > 0) {
-        actionsEl.innerHTML = appt.suggested_actions.map(a => `<li class="flex items-start gap-2"><span class="text-brand-500">↳</span> <span>${esc(a)}</span></li>`).join("");
+        actionsEl.innerHTML = appt.suggested_actions.map(a => `<li class="flex items-start gap-2.5"><span class="text-accentCyan mt-0.5">↳</span> <span>${esc(a)}</span></li>`).join("");
       } else {
-        actionsEl.innerHTML = `<li class="italic text-slate-500">No actions suggested.</li>`;
+        actionsEl.innerHTML = `<li class="italic text-slate-500">No diagnostic orders or suggested actions from AI agent.</li>`;
       }
 
       const completeBtn = document.getElementById("briefCompleteBtn");
