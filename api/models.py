@@ -112,6 +112,26 @@ class AppointmentCreate(MongoBaseModel):
     priority_level: str = Field("NORMAL", description="Set to CRITICAL by Triage Agent if severe")
     suggested_actions: List[str] = Field(default_factory=list, description="Agentic preliminary tests/actions")
 
+    @field_validator("patient_contact", mode="before")
+    @classmethod
+    def normalize_contact(cls, v: str) -> str:
+        if not isinstance(v, str):
+            return v
+        # Strip common formatting characters
+        clean = v.replace("-", "").replace(" ", "").replace("(", "").replace(")", "")
+        
+        # Check standard Pakistani formats
+        if clean.startswith("03") and len(clean) == 11:
+            return f"+92 {clean[1:4]} {clean[4:]}"
+        elif clean.startswith("3") and len(clean) == 10:
+            return f"+92 {clean[0:3]} {clean[3:]}"
+        elif clean.startswith("92") and len(clean) == 12:
+            return f"+{clean[0:2]} {clean[2:5]} {clean[5:]}"
+        elif clean.startswith("+92") and (len(clean) == 13 or len(clean) == 12):
+            return f"+92 {clean[3:6]} {clean[6:]}"
+                
+        return v
+
 
 class AppointmentInDB(AppointmentCreate):
     """Appointment as stored in MongoDB."""

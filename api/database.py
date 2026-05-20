@@ -60,7 +60,12 @@ class MockCollection:
         if initial_data:
             for doc in initial_data:
                 if "_id" not in doc:
-                    doc["_id"] = ObjectId()
+                    import hashlib
+                    # Generate a deterministic 12-byte ObjectId based on email/name to ensure
+                    # consistent IDs across server restarts and serverless cold starts.
+                    seed_str = doc.get("email", doc.get("name", ""))
+                    h = hashlib.md5(seed_str.encode("utf-8")).digest()[:12]
+                    doc["_id"] = ObjectId(h)
                 self.data.append(doc)
 
     async def count_documents(self, query: dict) -> int:

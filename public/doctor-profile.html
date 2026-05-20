@@ -360,7 +360,24 @@
           return;
         }
 
-        if (!resp.ok) throw new Error();
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({}));
+          let msg = "Booking failed";
+          if (Array.isArray(err.detail)) {
+            msg = err.detail.map((d) => {
+              if (d.loc && d.loc.includes("patient_contact")) {
+                return "Please enter a valid Pakistani contact number (e.g., +92 300 1234567 or 03001234567).";
+              }
+              if (d.loc && d.loc.includes("patient_email")) {
+                return "Please enter a valid email address.";
+              }
+              return d.msg || "Invalid field";
+            }).join(" ");
+          } else if (typeof err.detail === "string") {
+            msg = err.detail;
+          }
+          throw new Error(msg);
+        }
         
         const data = await resp.json();
         const waitMsg = data.predicted_wait_minutes != null 
@@ -375,7 +392,7 @@
         if (syncBadge) syncBadge.classList.add("hidden");
         updateSlots(date);
       } catch (err) {
-        showToast("Failed to secure appointment booking. Verify inputs.");
+        showToast(err.message || "Failed to secure appointment booking. Verify inputs.");
       }
     }
   </script>

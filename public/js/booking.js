@@ -119,7 +119,21 @@ async function submitBooking() {
 
     if (!resp.ok) {
       const err = await resp.json().catch(() => ({}));
-      throw new Error(err.detail || "Booking failed");
+      let msg = "Booking failed";
+      if (Array.isArray(err.detail)) {
+        msg = err.detail.map((d) => {
+          if (d.loc && d.loc.includes("patient_contact")) {
+            return "Please enter a valid Pakistani contact number (e.g., +92 300 1234567 or 03001234567).";
+          }
+          if (d.loc && d.loc.includes("patient_email")) {
+            return "Please enter a valid email address.";
+          }
+          return d.msg || "Invalid field";
+        }).join(" ");
+      } else if (typeof err.detail === "string") {
+        msg = err.detail;
+      }
+      throw new Error(msg);
     }
 
     const data = await resp.json();
@@ -134,7 +148,7 @@ async function submitBooking() {
       5000
     );
   } catch (err) {
-    showToast("Booking failed. Please try again.");
+    showToast(err.message || "Booking failed. Please try again.");
     console.error("Booking error:", err);
   }
 }
