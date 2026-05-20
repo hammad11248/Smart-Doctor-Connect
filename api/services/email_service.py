@@ -48,7 +48,7 @@ async def send_doctor_notification(
         await db.email_logs.insert_one(email_record)
         # Simulated email send — replace with real SMTP/SendGrid in production
         logger.info(
-            f"📧 EMAIL SENT (simulated)\n"
+            f"[EMAIL] SENT (simulated)\n"
             f"   To: {doctor_email}\n"
             f"   Subject: New Patient Message — {patient_name}\n"
             f"   Patient Contact: {patient_contact or 'N/A'}\n"
@@ -56,7 +56,7 @@ async def send_doctor_notification(
         )
         print(
             f"\n{'='*60}\n"
-            f"📧 EMAIL NOTIFICATION (Simulated)\n"
+            f"[EMAIL] NOTIFICATION (Simulated)\n"
             f"{'='*60}\n"
             f"To: {doctor_email}\n"
             f"Subject: New Patient Message — {patient_name}\n"
@@ -112,7 +112,7 @@ async def send_appointment_confirmation(
         await db.email_logs.insert_one(email_record)
         print(
             f"\n{'='*60}\n"
-            f"📧 APPOINTMENT CONFIRMATION (Simulated)\n"
+            f"[EMAIL] APPOINTMENT CONFIRMATION (Simulated)\n"
             f"{'='*60}\n"
             f"To: {patient_email}\n"
             f"Doctor: {doctor_name}\n"
@@ -160,7 +160,7 @@ async def send_followup_reminder(
         await db.email_logs.insert_one(email_record)
         print(
             f"\n{'='*60}\n"
-            f"📧 FOLLOW-UP REMINDER (Simulated)\n"
+            f"[EMAIL] FOLLOW-UP REMINDER (Simulated)\n"
             f"{'='*60}\n"
             f"To: {patient_email}\n"
             f"Re: Message to {doctor_name}\n"

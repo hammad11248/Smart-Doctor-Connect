@@ -30,7 +30,11 @@ from api.routers import doctors, appointments, chat, agents
 # ─────────────────────────────────────────────────────────────
 load_dotenv()
 
-ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+# Automatically detect Vercel serverless environment
+if os.getenv("VERCEL") == "1":
+    ENVIRONMENT = "production"
+else:
+    ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
 
 # ─────────────────────────────────────────────────────────────

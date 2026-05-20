@@ -171,11 +171,11 @@ async def _schedule_followup(
             scheduler.start()
 
         print(
-            f"⏰ Follow-up reminder scheduled for {patient_name} "
+            f"[SCHEDULER] Follow-up reminder scheduled for {patient_name} "
             f"regarding {doctor_name} at {run_time.isoformat()}"
         )
     except Exception as e:
-        print(f"⚠️ Could not schedule follow-up (non-critical): {e}")
+        print(f"[WARNING] Could not schedule follow-up (non-critical): {e}")
 
 
 # ── Triage Helpers ────────────────────────────────────────────────────────────

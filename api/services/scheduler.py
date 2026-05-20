@@ -15,7 +15,8 @@ class _NoOpScheduler:
 
 
 # Only import APScheduler in development (it's not in production requirements)
-if os.getenv("ENVIRONMENT", "development") == "development":
+is_production = os.getenv("VERCEL") == "1" or os.getenv("ENVIRONMENT") == "production"
+if not is_production:
     try:
         from apscheduler.schedulers.asyncio import AsyncIOScheduler
         scheduler = AsyncIOScheduler()

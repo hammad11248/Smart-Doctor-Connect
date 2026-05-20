@@ -1,7 +1,7 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/main.py" },
+    { "source": "/api/(.*)", "destination": "/api/main" },
     { "source": "/(.*)", "destination": "/public/$1" }
   ],
   "headers": [
