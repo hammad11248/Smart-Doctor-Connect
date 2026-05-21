@@ -216,6 +216,97 @@ class SymptomRecommender:
                     ) > {"EMERGENCY": 3, "HIGH": 2, "MEDIUM": 1, "LOW": 0}.get(urgency, 0):
                         urgency = candidate
 
+        # Broad fuzzy fallback if no exact keyphrase matched
+        if not matched_specs:
+            broad_map = {
+                "heart": ["Cardiologist"],
+                "chest": ["Cardiologist"],
+                "cardio": ["Cardiologist"],
+                "blood pressure": ["Cardiologist"],
+                "bp": ["Cardiologist"],
+                
+                "skin": ["Dermatologist"],
+                "rash": ["Dermatologist"],
+                "acne": ["Dermatologist"],
+                "pimple": ["Dermatologist"],
+                "itch": ["Dermatologist"],
+                "hair": ["Dermatologist"],
+                
+                "child": ["Pediatrician"],
+                "baby": ["Pediatrician"],
+                "infant": ["Pediatrician"],
+                "kid": ["Pediatrician"],
+                "pediatric": ["Pediatrician"],
+                
+                "head": ["Neurologist"],
+                "brain": ["Neurologist"],
+                "seizure": ["Neurologist"],
+                "stroke": ["Neurologist"],
+                "migraine": ["Neurologist"],
+                
+                "bone": ["Orthopedic Surgeon"],
+                "joint": ["Orthopedic Surgeon"],
+                "knee": ["Orthopedic Surgeon"],
+                "back": ["Orthopedic Surgeon"],
+                "fracture": ["Orthopedic Surgeon"],
+                "shoulder": ["Orthopedic Surgeon"],
+                "muscle": ["Orthopedic Surgeon"],
+                
+                "stomach": ["Gastroenterologist"],
+                "belly": ["Gastroenterologist"],
+                "digestion": ["Gastroenterologist"],
+                "vomit": ["Gastroenterologist"],
+                "diarrhea": ["Gastroenterologist"],
+                "nausea": ["Gastroenterologist"],
+                "acid": ["Gastroenterologist"],
+                "bloating": ["Gastroenterologist"],
+                
+                "cough": ["Pulmonologist"],
+                "asthma": ["Pulmonologist"],
+                "lung": ["Pulmonologist"],
+                "breath": ["Pulmonologist"],
+                
+                "urine": ["Urologist"],
+                "kidney": ["Urologist"],
+                "prostate": ["Urologist"],
+                
+                "pregnant": ["Gynecologist"],
+                "pregnancy": ["Gynecologist"],
+                "period": ["Gynecologist"],
+                "pcos": ["Gynecologist"],
+                "gyne": ["Gynecologist"],
+                
+                "eye": ["Ophthalmologist"],
+                "vision": ["Ophthalmologist"],
+                "sight": ["Ophthalmologist"],
+                
+                "depressed": ["Psychiatrist"],
+                "anxious": ["Psychiatrist"],
+                "stress": ["Psychiatrist"],
+                "sad": ["Psychiatrist"],
+                "mental": ["Psychiatrist"],
+                
+                "tooth": ["Dentist"],
+                "teeth": ["Dentist"],
+                "gum": ["Dentist"],
+                
+                "diabetes": ["Endocrinologist"],
+                "thyroid": ["Endocrinologist"],
+                "hormone": ["Endocrinologist"],
+                
+                "ear": ["ENT Specialist"],
+                "throat": ["ENT Specialist"],
+                "nose": ["ENT Specialist"],
+                "hearing": ["ENT Specialist"],
+                "sinus": ["ENT Specialist"]
+            }
+            
+            for broad_key, specs in broad_map.items():
+                if broad_key in lower:
+                    for s in specs:
+                        if s not in matched_specs:
+                            matched_specs.append(s)
+                            
         if not matched_specs:
             matched_specs = ["General Physician"]
 
