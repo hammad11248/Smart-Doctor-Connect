@@ -1,7 +1,13 @@
 {
   "version": 2,
+  "builds": [
+    {
+      "src": "api/main.py",
+      "use": "@vercel/python"
+    }
+  ],
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/main" },
+    { "source": "/api/(.*)", "destination": "/api/main.py" },
     { "source": "/(.*)", "destination": "/public/$1" }
   ],
   "headers": [
