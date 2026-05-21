@@ -78,7 +78,7 @@ function buildDoctorCard(doc, options = {}) {
     scoreHtml = `
       <div style="margin-top:0.25rem;">
         <div style="display:flex;justify-content:space-between;margin-bottom:0.35rem;">
-          <span class="label-micro">AI Match</span>
+          <span class="label-micro">Clinical Fit</span>
           <span class="label-micro" style="color:var(--accent-cyan);">${score}%</span>
         </div>
         <div class="score-bar-track">

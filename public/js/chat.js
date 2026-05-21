@@ -1,7 +1,7 @@
 /**
  * Smart Doctor Connect AI — Real-time Chat Interface (chat.js)
- * Handles the AI receptionist chatbot on doctor profile pages.
- * Sends messages to the backend, displays AI responses, and loads chat history.
+ * Handles the virtual clinical intake coordinator on doctor profile pages.
+ * Sends messages to the backend, displays assistant responses, and loads chat history.
  */
 
 // ── Chat State ──────────────────────────────────────────────────────────────
@@ -73,7 +73,7 @@ async function sendChatMessage() {
     }
 
     const data = await resp.json();
-    addChatBubble(data.ai_response, "ai", "AI Receptionist");
+    addChatBubble(data.ai_response, "ai", "Intake Coordinator");
 
     // Show notification about doctor availability
     if (!data.doctor_available) {
@@ -106,16 +106,16 @@ async function loadChatHistory(doctorId) {
     const messages = await resp.json();
     if (!messages.length) {
       addChatBubble(
-        "Welcome! Send a message and our AI receptionist will assist you.",
+        "Welcome! Please describe your symptoms or medical inquiry; our virtual clinical intake coordinator will assist you in preparing your profile.",
         "ai",
-        "AI Receptionist"
+        "Intake Coordinator"
       );
       return;
     }
 
     messages.forEach((msg) => {
       addChatBubble(msg.message, "patient", msg.patient_name);
-      addChatBubble(msg.ai_response, "ai", "AI Receptionist");
+      addChatBubble(msg.ai_response, "ai", "Intake Coordinator");
     });
   } catch (err) {
     console.error("Failed to load chat history:", err);
@@ -161,7 +161,7 @@ function addTypingIndicator() {
   indicator.className = "chat-bubble-ai";
   indicator.style.cssText = "margin-right:auto;padding:1rem 1.25rem;max-width:80%;font-size:0.85rem;display:flex;align-items:center;gap:0.75rem;";
   indicator.innerHTML = `
-    <span class="label-micro" style="color:var(--accent-cyan);">System AI</span>
+    <span class="label-micro" style="color:var(--accent-cyan);">Clinical Assistant</span>
     <div class="typing-indicator">
       <span class="typing-dot"></span>
       <span class="typing-dot"></span>
@@ -211,8 +211,8 @@ async function finishChatAndSummarize() {
   const history = [];
   Array.from(container.children).forEach((bubble) => {
     if (bubble.id && bubble.id.startsWith("typing")) return;
-    const isPatient = bubble.className.includes("self-end");
-    const role = isPatient ? "Patient" : "AI";
+    const isPatient = bubble.className.includes("chat-bubble-user") || bubble.className.includes("self-end");
+    const role = isPatient ? "Patient" : "Staff";
     const pTag = bubble.querySelector("p");
     if (pTag) {
       history.push({ role, content: pTag.textContent });

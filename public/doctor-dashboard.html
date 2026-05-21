@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Smart Doctor Connect — Clinical Operations Panel</title>
-  <meta name="description" content="Manage your medical practice, register credentials, configure availability slots, and review AI triage summaries." />
+  <meta name="description" content="Manage your medical practice, register credentials, configure availability slots, and review EHR patient intake summaries." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,7 +42,7 @@
         </div>
         <div class="site-header__logo-text">
           <span>Smart Doctor</span>
-          <span>Connect AI</span>
+          <span>Connect Portal</span>
         </div>
       </a>
       <nav class="site-nav">
@@ -59,7 +59,7 @@
         <span class="badge-dot badge-dot--pulse" style="color:var(--accent-cyan);"></span> Clinical Practice Node Active
       </div>
       <h1 style="color:white;max-width:600px;margin:0 auto 1rem;">Practice & Clinical Queue Panel</h1>
-      <p style="max-width:520px;margin:0 auto;font-size:0.9rem;">Configure your consultation blocks, monitor queue positions, and review real-time AI triage summaries.</p>
+      <p style="max-width:520px;margin:0 auto;font-size:0.9rem;">Configure your consultation blocks, monitor queue positions, and review real-time EHR patient intake summaries.</p>
     </div>
   </section>
 
@@ -219,7 +219,7 @@
       <div id="schedApptsWrap" class="hidden glass-panel p-6 sm:p-8">
         <div class="pb-4 border-b border-white/5 mb-6">
           <h3 class="font-display font-black text-2xl text-white">Active Queue</h3>
-          <p class="text-xs text-slate-400 mt-0.5">Click any queue card to synchronize the AI triage briefing and suggested clinical orders.</p>
+          <p class="text-xs text-slate-400 mt-0.5">Click any queue card to synchronize the EHR patient intake briefing and clinical workflow actions.</p>
         </div>
         
         <div id="schedApptsList" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -241,7 +241,7 @@
       <div class="flex items-center gap-4 mb-6 pb-4 border-b border-white/5">
         <div class="w-12 h-12 rounded-xl bg-accentCyan/10 border border-accentCyan/20 flex items-center justify-center text-2xl shadow-inner animate-pulse">🧠</div>
         <div class="flex-1">
-          <h3 class="font-display font-extrabold text-xl text-white">AI Diagnostic Briefing</h3>
+          <h3 class="font-display font-extrabold text-xl text-white">EHR Clinical Intake Summary</h3>
           <p class="text-xs text-accentCyan font-bold tracking-wider uppercase mt-1" id="briefName">—</p>
         </div>
         <span id="briefPriority" class="text-[9px] font-black tracking-widest uppercase px-3 py-1 rounded-full bg-deep border">NORMAL</span>
@@ -265,7 +265,7 @@
         </div>
 
         <div>
-          <label class="block text-[10px] text-slate-400 uppercase tracking-wider mb-1.5">AI Agent Suggested Clinical Actions</label>
+          <label class="block text-[10px] text-slate-400 uppercase tracking-wider mb-1.5">EHR Suggested Clinical Actions & Orders</label>
           <ul class="space-y-2 bg-deep/80 p-5 rounded-xl border border-white/5 text-slate-300 font-medium text-xs shadow-inner" id="briefActions"></ul>
         </div>
       </div>
@@ -516,7 +516,7 @@
       document.getElementById("briefContact").textContent = appt.patient_contact;
       
       const summaryEl = document.getElementById("briefSummary");
-      summaryEl.textContent = appt.triage_summary || "No AI Triage Summary available.";
+      summaryEl.textContent = appt.triage_summary || "No clinical intake summary synced to EHR.";
       
       const priorityEl = document.getElementById("briefPriority");
       const priority = appt.priority_level || "NORMAL";
@@ -531,7 +531,7 @@
       if (appt.suggested_actions && appt.suggested_actions.length > 0) {
         actionsEl.innerHTML = appt.suggested_actions.map(a => `<li class="flex items-start gap-2.5"><span class="text-accentCyan mt-0.5">↳</span> <span>${esc(a)}</span></li>`).join("");
       } else {
-        actionsEl.innerHTML = `<li class="italic text-slate-500">No diagnostic orders or suggested actions from AI agent.</li>`;
+        actionsEl.innerHTML = `<li class="italic text-slate-500">No pre-consultation diagnostic orders recommended in clinical workflow.</li>`;
       }
 
       const completeBtn = document.getElementById("briefCompleteBtn");

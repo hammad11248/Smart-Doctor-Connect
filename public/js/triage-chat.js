@@ -1,6 +1,6 @@
 /**
- * Smart Doctor Connect AI — Home Page Floating Triage Assistant (triage-chat.js)
- * Manages the floating AI receptionist bot on the landing page.
+ * Smart Doctor Connect — Home Page Floating Triage Assistant (triage-chat.js)
+ * Manages the virtual patient intake assistant on the landing page.
  * Sends symptom inputs to the backend triage endpoint and displays doctor cards directly in-chat.
  */
 
@@ -41,11 +41,10 @@ function initTriageChat() {
 
   container.innerHTML = "";
   
-  // Welcome message
   addTriageBubble(
-    "Hello there! I am your AI Health Assistant. Tell me your name and describe what you are feeling (symptoms) to instantly find the best specialists.",
+    "Hello there! I am your virtual clinical intake coordinator. Please tell me your name and describe your symptoms to help us map the best matching specialists for your needs.",
     "ai",
-    "Smart Doctor AI"
+    "Patient Intake Assistant"
   );
 }
 
@@ -107,7 +106,7 @@ async function sendTriageMessage() {
     const data = await resp.json();
     
     // Render AI's response text
-    addTriageBubble(data.ai_response, "ai", "Smart Doctor AI");
+    addTriageBubble(data.ai_response, "ai", "Patient Intake Assistant");
 
     // Display recommendation badge
     if (data.specializations?.length) {
@@ -121,9 +120,9 @@ async function sendTriageMessage() {
   } catch (err) {
     removeTriageTypingIndicator(typingId);
     addTriageBubble(
-      "I encountered an issue connecting to the AI service. Don't worry! Try searching your symptoms using the search bar above.",
+      "I encountered an issue connecting to the clinical intake service. Please search your symptoms directly using the search bar above.",
       "ai",
-      "Smart Doctor AI"
+      "Patient Intake Assistant"
     );
     console.error("Triage chat error:", err);
   } finally {
@@ -249,7 +248,7 @@ function addTriageTypingIndicator() {
   indicator.className = "chat-bubble-ai";
   indicator.style.cssText = "margin-right:auto;padding:1rem 1.25rem;max-width:80%;font-size:0.85rem;display:flex;align-items:center;gap:0.75rem;";
   indicator.innerHTML = `
-    <span class="label-micro" style="color:var(--accent-cyan);">System AI</span>
+    <span class="label-micro" style="color:var(--accent-cyan);">Patient Intake System</span>
     <div class="typing-indicator">
       <span class="typing-dot"></span>
       <span class="typing-dot"></span>

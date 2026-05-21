@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Smart Doctor Connect — Clinical Specialist Profile</title>
-  <meta name="description" content="View specialist credentials, chat with the AI receptionist, and book appointments instantly." />
+  <meta name="description" content="View specialist credentials, interact with our virtual clinical intake coordinator, and book appointments instantly." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,7 +35,7 @@
         </div>
         <div class="site-header__logo-text">
           <span>Smart Doctor</span>
-          <span>Connect AI</span>
+          <span>Connect Portal</span>
         </div>
       </a>
       <nav class="site-nav">
@@ -87,16 +87,16 @@
     <!-- Workspace Grid: Triage Chat & Booking -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
       
-      <!-- Left Column (5 Cols): AI Receptionist -->
+      <!-- Left Column (5 Cols): Clinical Workflow Assistant -->
       <div class="lg:col-span-5 glass-panel p-6 flex flex-col h-[650px] relative overflow-hidden">
         
         <!-- Tab Header -->
         <div class="pb-4 border-b border-white/5 mb-4 shrink-0 flex items-center justify-between">
           <div>
             <h2 class="font-display font-extrabold text-lg text-white flex items-center gap-2">
-              <span class="text-sm">🤖</span> AI Clinical Receptionist
+              <span class="text-sm">🏥</span> Clinical Workflow Assistant
             </h2>
-            <p class="text-xs text-slate-400 mt-0.5">Automated triage & immediate specialism sync.</p>
+            <p class="text-xs text-slate-400 mt-0.5">Automated patient intake & immediate specialism sync.</p>
           </div>
           <span class="text-[9px] font-black text-accentCyan bg-accentCyan/10 px-2 py-0.5 rounded-full uppercase tracking-widest border border-accentCyan/20 animate-pulse">Sync Active</span>
         </div>
@@ -181,10 +181,10 @@
 
           <div>
             <div class="flex items-center justify-between mb-1">
-              <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Triage Summary Note</label>
-              <span id="syncBadge" class="hidden text-[8px] font-black text-accentTeal bg-accentTeal/10 px-2 py-0.5 rounded uppercase tracking-wider animate-pulse border border-accentTeal/20">AI Synced</span>
+              <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Patient Intake Note</label>
+              <span id="syncBadge" class="hidden text-[8px] font-black text-accentTeal bg-accentTeal/10 px-2 py-0.5 rounded uppercase tracking-wider animate-pulse border border-accentTeal/20">EHR Synced</span>
             </div>
-            <textarea id="qbSymptoms" placeholder="Optionally describe symptoms, or complete the AI receptionist chat to auto-inject a highly detailed diagnostic briefing here..." class="input-field resize-none h-24 font-medium transition-all duration-500"></textarea>
+            <textarea id="qbSymptoms" placeholder="Optionally describe symptoms, or complete the clinical workflow assistant chat to auto-inject a highly detailed diagnostic briefing here..." class="input-field resize-none h-24 font-medium transition-all duration-500"></textarea>
           </div>
         </div>
 
