@@ -215,6 +215,15 @@
         </div>
       </div>
 
+      <!-- Selector Guidance Empty State -->
+      <div id="schedGuidance" class="glass-panel p-8 text-center flex flex-col items-center justify-center space-y-4">
+        <div class="w-16 h-16 rounded-full bg-accentCyan/10 border border-accentCyan/20 flex items-center justify-center text-3xl shadow-inner animate-pulse">📋</div>
+        <div class="max-w-md">
+          <h3 class="font-display font-black text-lg text-white mb-2">No Schedule Loaded</h3>
+          <p class="text-xs text-slate-400 font-medium">Please select an active clinical provider and operational date in the filters above to retrieve the daily schedule metrics, slot timelines, and patient triage queues.</p>
+        </div>
+      </div>
+
       <!-- Clinical Appointments Queue Grid -->
       <div id="schedApptsWrap" class="hidden glass-panel p-6 sm:p-8">
         <div class="pb-4 border-b border-white/5 mb-6">
@@ -406,7 +415,13 @@
     async function loadScheduleView() {
       const docId = document.getElementById("schedDocSelect").value;
       const date = document.getElementById("schedDate").value;
-      if (!docId || !date) return;
+      if (!docId || !date) {
+        document.getElementById("schedStats").classList.add("hidden");
+        document.getElementById("slotGrid").classList.add("hidden");
+        document.getElementById("schedApptsWrap").classList.add("hidden");
+        document.getElementById("schedGuidance").classList.remove("hidden");
+        return;
+      }
       try {
         const slotsData = await apiFetch(`${API_BASE}/appointments/available-slots/${docId}?date=${date}`);
         renderSlotGrid(slotsData);
@@ -420,6 +435,7 @@
     function renderSlotGrid(data) {
       document.getElementById("schedStats").classList.remove("hidden");
       document.getElementById("slotGrid").classList.remove("hidden");
+      document.getElementById("schedGuidance").classList.add("hidden");
 
       const total = data.all_slots.length;
       const booked = data.booked_slots.length;
@@ -453,6 +469,7 @@
       const wrap = document.getElementById("schedApptsWrap");
       const list = document.getElementById("schedApptsList");
       wrap.classList.remove("hidden");
+      document.getElementById("schedGuidance").classList.add("hidden");
 
       if (!appts.length) {
         list.innerHTML = `<div class="col-span-full text-center py-12"><p class="text-4xl mb-3 opacity-70">📅</p><p class="text-xs font-bold text-slate-400">No appointments scheduled for this date</p></div>`;
