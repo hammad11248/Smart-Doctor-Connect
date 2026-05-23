@@ -261,30 +261,160 @@ DEMO_DOCTORS = [
         "total_reviews": 48,
         "created_at": datetime.now(timezone.utc),
     },
+    {
+        "name": "Dr. Faisal Malik",
+        "specialization": "Dentist",
+        "location": "Karachi",
+        "consultation_type": "both",
+        "email": "faisal.malik@example.com",
+        "phone": "+92 312 3456789",
+        "bio": "Experienced dental surgeon specializing in cosmetic dentistry, dental implants, and root canal therapy.",
+        "experience_years": 10,
+        "consultation_fee": 1200,
+        "availability": {
+            "Monday": ["09:00", "09:30", "10:00", "10:30"],
+            "Wednesday": ["14:00", "14:30", "15:00", "15:30"],
+            "Friday": ["09:00", "09:30", "10:00"],
+        },
+        "is_available": True,
+        "rating": 4.6,
+        "total_reviews": 58,
+        "created_at": datetime.now(timezone.utc),
+    },
+    {
+        "name": "Dr. Amna Saeed",
+        "specialization": "Ophthalmologist",
+        "location": "Lahore",
+        "consultation_type": "both",
+        "email": "amna.saeed@example.com",
+        "phone": "+92 313 4567890",
+        "bio": "Expert eye specialist with 8 years of experience. Specializes in cataract surgery and pediatric ophthalmology.",
+        "experience_years": 8,
+        "consultation_fee": 1500,
+        "availability": {
+            "Tuesday": ["10:00", "10:30", "11:00", "11:30"],
+            "Thursday": ["14:00", "14:30", "15:00"],
+            "Saturday": ["09:00", "09:30"],
+        },
+        "is_available": True,
+        "rating": 4.7,
+        "total_reviews": 64,
+        "created_at": datetime.now(timezone.utc),
+    },
+    {
+        "name": "Dr. Haroon Rasheed",
+        "specialization": "Urologist",
+        "location": "Islamabad",
+        "consultation_type": "both",
+        "email": "haroon.rasheed@example.com",
+        "phone": "+92 314 5678901",
+        "bio": "Senior urologist specializing in kidney stones treatment, prostate health, and male fertility concerns.",
+        "experience_years": 14,
+        "consultation_fee": 2200,
+        "availability": {
+            "Monday": ["11:00", "11:30", "12:00"],
+            "Thursday": ["10:00", "10:30", "11:00"],
+            "Friday": ["15:00", "15:30", "16:00"],
+        },
+        "is_available": True,
+        "rating": 4.5,
+        "total_reviews": 42,
+        "created_at": datetime.now(timezone.utc),
+    },
+    {
+        "name": "Dr. Sana Bukhari",
+        "specialization": "Rheumatologist",
+        "location": "Rawalpindi",
+        "consultation_type": "in_person",
+        "email": "sana.bukhari@example.com",
+        "phone": "+92 315 6789012",
+        "bio": "Specializes in autoimmune disease management, severe arthritis, and joint pain therapy.",
+        "experience_years": 11,
+        "consultation_fee": 2000,
+        "availability": {
+            "Tuesday": ["09:00", "09:30", "10:00", "10:30"],
+            "Wednesday": ["09:00", "09:30", "10:00"],
+            "Friday": ["14:00", "14:30"],
+        },
+        "is_available": True,
+        "rating": 4.4,
+        "total_reviews": 31,
+        "created_at": datetime.now(timezone.utc),
+    },
+    {
+        "name": "Dr. Asif Mahmood",
+        "specialization": "Nephrologist",
+        "location": "Faisalabad",
+        "consultation_type": "both",
+        "email": "asif.mahmood@example.com",
+        "phone": "+92 316 7890123",
+        "bio": "Renowned nephrologist providing complete kidney care, hypertension control, and dialysis management.",
+        "experience_years": 17,
+        "consultation_fee": 2500,
+        "availability": {
+            "Monday": ["09:00", "09:30", "10:00"],
+            "Wednesday": ["10:00", "10:30", "11:00"],
+            "Saturday": ["14:00", "14:30", "15:00"],
+        },
+        "is_available": True,
+        "rating": 4.8,
+        "total_reviews": 50,
+        "created_at": datetime.now(timezone.utc),
+    },
+    {
+        "name": "Dr. Maria Qazi",
+        "specialization": "Allergist",
+        "location": "Peshawar",
+        "consultation_type": "both",
+        "email": "maria.qazi@example.com",
+        "phone": "+92 317 8901234",
+        "bio": "Expert in treating environmental allergies, asthma, and chronic skin allergies.",
+        "experience_years": 9,
+        "consultation_fee": 1600,
+        "availability": {
+            "Tuesday": ["10:00", "10:30", "11:00"],
+            "Thursday": ["11:00", "11:30", "12:00"],
+            "Saturday": ["10:00", "10:30"],
+        },
+        "is_available": True,
+        "rating": 4.6,
+        "total_reviews": 29,
+        "created_at": datetime.now(timezone.utc),
+    },
 ]
 
 
 async def seed():
     uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017")
-    client = AsyncIOMotorClient(uri)
+    print(f"Connecting to MongoDB at {uri}...")
+    try:
+        client = AsyncIOMotorClient(uri, serverSelectionTimeoutMS=3000)
+        # Trigger connection check
+        await client.server_info()
+    except Exception as e:
+        print(f"[ERROR] Failed to connect to MongoDB: {e}")
+        print("Please make sure MongoDB is running locally, or configure MONGODB_URI in your .env file.")
+        print("Note: The application will still run perfectly by falling back to the In-Memory Mock Database!")
+        return
+
     db = client.get_default_database(default="smart_doctor_db")
 
     # Clear existing doctors to avoid duplicates
     existing = await db.doctors.count_documents({})
     if existing > 0:
-        print(f"⚠️  Found {existing} existing doctors. Clearing collection...")
+        print(f"[WARNING] Found {existing} existing doctors. Clearing collection...")
         await db.doctors.delete_many({})
 
     # Insert demo data
     result = await db.doctors.insert_many(DEMO_DOCTORS)
-    print(f"✅ Successfully seeded {len(result.inserted_ids)} demo doctors!")
+    print(f"[SUCCESS] Successfully seeded {len(result.inserted_ids)} demo doctors!")
 
     # Print summary
-    print("\n📋 Seeded Doctors:")
+    print("\n[INFO] Seeded Doctors:")
     print(f"{'Name':<25} {'Specialization':<25} {'Location':<15} {'Available'}")
     print("-" * 80)
     for doc in DEMO_DOCTORS:
-        status = "✅" if doc["is_available"] else "❌"
+        status = "YES" if doc["is_available"] else "NO"
         print(f"{doc['name']:<25} {doc['specialization']:<25} {doc['location']:<15} {status}")
 
     # Create indexes
@@ -293,10 +423,10 @@ async def seed():
     await db.doctors.create_index("specialization")
     await db.doctors.create_index("location")
     await db.doctors.create_index("is_available")
-    print("\n📇 Database indexes created.")
+    print("\n[SUCCESS] Database indexes created.")
 
     client.close()
-    print("\n🎉 Seed complete! Run the server with: uvicorn api.main:app --reload --port 8000")
+    print("\n[SUCCESS] Seed complete! Run the server with: uvicorn api.main:app --reload --port 8000")
 
 
 if __name__ == "__main__":
