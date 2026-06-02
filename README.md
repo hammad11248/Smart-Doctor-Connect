@@ -1,4 +1,4 @@
-# 🏥 Smart Doctor Connect AI — OneRecord: Universal Health ID
+# 🏥 Smart-Doctor-Connect-AI — OneRecord: Universal Health ID
 
 **MTM (Mind-to-Machine) AI Hackathon — GDGoC CUI Wah**
 
@@ -8,7 +8,7 @@
 
 ## 🚀 What It Does
 
-Accessing healthcare in Pakistan is fragmented and slow. Smart Doctor Connect AI solves this with a single intelligent platform:
+Accessing healthcare in Pakistan is fragmented and slow. Smart-Doctor-Connect-AI solves this with a single intelligent platform:
 
 | Feature | Description |
 |---|---|

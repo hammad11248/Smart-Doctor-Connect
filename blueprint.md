@@ -1,4 +1,4 @@
-# 🏥 smart-doctor-connect-ai-AI
+# 🏥 Smart-Doctor-Connect-AI
 
 **MTM (Mind-to-Machine) AI Hackathon — GDGoC CUI Wah**
 
@@ -14,7 +14,7 @@ Accessing healthcare in Pakistan is fragmented and slow:
 * No centralized platform exists with real-time appointments
 * Doctors lose patients due to missed messages and no automation
 
-**smart-doctor-connect-ai-AI** solves this with a single intelligent platform.
+**Smart-Doctor-Connect-AI** solves this with a single intelligent platform.
 
 \---
 
@@ -177,7 +177,7 @@ APScheduler==3.10.4
 
 ```python
 """
-smart-doctor-connect-ai-AI — FastAPI Entry Point
+Smart-Doctor-Connect-AI — FastAPI Entry Point
 Handles app lifecycle, CORS, rate limiting, and router registration.
 """
 
@@ -215,7 +215,7 @@ async def lifespan(app: FastAPI):
 
 # ── App Factory ───────────────────────────────────────────────────────────────
 app = FastAPI(
-    title="smart-doctor-connect-ai-AI",
+    title="Smart-Doctor-Connect-AI",
     description="AI-powered doctor discovery and appointment booking for Pakistan",
     version="1.0.0",
     lifespan=lifespan,
@@ -257,7 +257,7 @@ async def health\_check():
 
 ```python
 """
-smart-doctor-connect-ai-AI — Pydantic Data Models
+Smart-Doctor-Connect-AI — Pydantic Data Models
 All request/response schemas live here. MongoDB \_id is handled via aliases.
 """
 
@@ -425,7 +425,7 @@ class AISearchResult(MongoBaseModel):
 
 ```python
 """
-smart-doctor-connect-ai-AI — Doctors Router
+Smart-Doctor-Connect-AI — Doctors Router
 Endpoints: register, fetch, update, AI-powered search.
 The search pipeline: raw text → LLM/rule-based specialization → MongoDB query → scoring.
 """
@@ -645,7 +645,7 @@ async def list\_doctors(
 
 ```python
 """
-smart-doctor-connect-ai-AI — Symptom Recommender Service
+Smart-Doctor-Connect-AI — Symptom Recommender Service
 Two-stage pipeline:
   1. LangChain LLM (Mistral-7B via OpenRouter) — rich, context-aware analysis
   2. Rule-based fallback (100+ symptom→specialization pairs) — always works
@@ -929,7 +929,7 @@ Respond exactly like this:
 
 ```python
 """
-smart-doctor-connect-ai-AI — MongoDB Connection Manager
+Smart-Doctor-Connect-AI — MongoDB Connection Manager
 Uses Motor (async) driver. Indexes are created on startup.
 """
 
@@ -991,7 +991,7 @@ def get\_db() -> AsyncIOMotorDatabase:
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>smart-doctor-connect-ai-AI — Pakistan</title>
+  <title>Smart-Doctor-Connect-AI — Pakistan</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     /\* Custom Tailwind config inline \*/
@@ -1043,7 +1043,7 @@ def get\_db() -> AsyncIOMotorDatabase:
     <a href="/" class="flex items-center gap-2">
       <span class="text-2xl">🏥</span>
       <span class="font-bold text-lg text-sky-700 leading-tight">
-        Smart Doctor<br class="sm:hidden"><span class="text-slate-500 font-normal"> Connect</span>
+        Smart-Doctor-Connect-AI
       </span>
     </a>
     <nav class="flex gap-4 items-center text-sm">
