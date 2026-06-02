@@ -1,5 +1,5 @@
 """
-Smart Doctor Connect AI — Email Service
+Smart-Doctor-Connect-AI — Email Service
 Simulates email notifications and logs them to MongoDB.
 In production, swap the print statements with SendGrid / SMTP calls.
 """
@@ -37,8 +37,8 @@ async def send_doctor_notification(
             f"You have a new message from {patient_name}"
             f"{f' (Contact: {patient_contact})' if patient_contact else ''}.\n\n"
             f'Message: "{message}"\n\n'
-            f"Please log in to Smart Doctor Connect to respond.\n\n"
-            f"— Smart Doctor Connect AI"
+            f"Please log in to Smart-Doctor-Connect-AI to respond.\n\n"
+            f"— Smart-Doctor-Connect-AI"
         ),
         "sent_at": datetime.now(timezone.utc),
         "status": "simulated",
@@ -102,7 +102,7 @@ async def send_appointment_confirmation(
             f"Queue Position: #{queue_position}\n"
             f"{wait_info}\n\n"
             f"Please arrive 10 minutes early for in-person visits.\n\n"
-            f"— Smart Doctor Connect AI"
+            f"— Smart-Doctor-Connect-AI"
         ),
         "sent_at": datetime.now(timezone.utc),
         "status": "simulated",
@@ -150,7 +150,7 @@ async def send_followup_reminder(
             f"1. Booking an appointment through our platform\n"
             f"2. Trying another available doctor in the same specialty\n"
             f"3. Visiting the nearest hospital if symptoms are urgent\n\n"
-            f"— Smart Doctor Connect AI"
+            f"— Smart-Doctor-Connect-AI"
         ),
         "sent_at": datetime.now(timezone.utc),
         "status": "simulated",

@@ -1,5 +1,5 @@
 /**
- * Smart Doctor Connect — Home Page Floating Triage Assistant (triage-chat.js)
+ * Smart-Doctor-Connect-AI — Home Page Floating Triage Assistant (triage-chat.js)
  * Manages the virtual patient intake assistant on the landing page.
  * Sends symptom inputs to the backend triage endpoint and displays doctor cards directly in-chat.
  */
@@ -212,7 +212,8 @@ function addTriageDoctorSuggestions(doctors) {
 
   doctors.forEach((doc) => {
     window.doctorCache = window.doctorCache || {};
-    window.doctorCache[doc._id] = doc.availability || {};
+    const docId = doc._id || doc.id || "";
+    window.doctorCache[docId] = doc.availability || {};
 
     const card = document.createElement("div");
     card.className = "tech-card";
@@ -227,7 +228,7 @@ function addTriageDoctorSuggestions(doctors) {
           <span style="font-size:0.7rem;color:var(--accent-teal);">★ ${doc.rating || "4.5"}</span>
         </div>
       </div>
-      <button onclick="window.location.href='/doctor-profile.html?id=${doc._id}&patient_name=${encodeURIComponent(triagePatientName)}&symptoms=${encodeURIComponent(latestSymptoms)}'" 
+      <button onclick="window.location.href='/doctor-profile.html?id=${docId}&patient_name=${encodeURIComponent(triagePatientName)}&symptoms=${encodeURIComponent(latestSymptoms)}'" 
         class="btn btn-primary" style="flex-shrink:0;padding:0.5rem 1rem;">Book</button>
     `;
     div.appendChild(card);

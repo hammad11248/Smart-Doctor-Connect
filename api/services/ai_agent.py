@@ -1,5 +1,5 @@
 """
-Smart Doctor Connect AI — AI Agent Service
+Smart-Doctor-Connect-AI — AI Agent Service
 LangChain-powered chatbot for the AI receptionist feature.
 Generates empathetic responses when doctors are offline and collects patient data.
 """
@@ -22,18 +22,17 @@ class AIAgent:
 
     def __init__(self):
         self._llm = None
-        self._llm_available = True
         self._recommender = SymptomRecommender()
 
     def _get_llm(self):
-        if not self._llm_available:
-            return None
+        """Return cached LLM instance, or create one. Returns None if API key missing."""
+        if self._llm is not None:
+            return self._llm
         try:
             from langchain_openai import ChatOpenAI
 
             api_key = os.getenv("OPENROUTER_API_KEY")
             if not api_key:
-                self._llm_available = False
                 return None
 
             self._llm = ChatOpenAI(
@@ -45,7 +44,6 @@ class AIAgent:
             )
             return self._llm
         except Exception:
-            self._llm_available = False
             return None
 
     async def generate_response(
@@ -82,7 +80,7 @@ class AIAgent:
         if llm is None:
             return None
 
-        prompt = f"""You are an AI receptionist for {doctor_name} at Smart Doctor Connect Pakistan.
+        prompt = f"""You are an AI receptionist for {doctor_name} at Smart-Doctor-Connect-AI Pakistan.
 The doctor is currently OFFLINE / unavailable.
 
 Patient "{patient_name}" says: "{message}"
@@ -101,8 +99,8 @@ Respond in plain text only — no JSON, no markdown."""
 
             response = await llm.ainvoke([HumanMessage(content=prompt)])
             return response.content.strip()
-        except Exception:
-            self._llm_available = False
+        except Exception as e:
+            print(f"[WARNING] AI Agent LLM call failed (will retry next request): {e}")
             return None
 
     def _template_response(

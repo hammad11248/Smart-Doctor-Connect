@@ -1,4 +1,4 @@
-# 🏥 Smart Doctor Connect AI
+# 🏥 smart-doctor-connect-ai-AI
 
 **MTM (Mind-to-Machine) AI Hackathon — GDGoC CUI Wah**
 
@@ -14,7 +14,7 @@ Accessing healthcare in Pakistan is fragmented and slow:
 * No centralized platform exists with real-time appointments
 * Doctors lose patients due to missed messages and no automation
 
-**Smart Doctor Connect AI** solves this with a single intelligent platform.
+**smart-doctor-connect-ai-AI** solves this with a single intelligent platform.
 
 \---
 
@@ -45,7 +45,7 @@ Accessing healthcare in Pakistan is fragmented and slow:
 ## 📁 Project Structure
 
 ```
-smart-doctor-connect/
+smart-doctor-connect-ai/
 ├── api/                        # FastAPI backend (Vercel serverless)
 │   ├── main.py                 # App entry point + CORS + lifespan
 │   ├── database.py             # MongoDB connection + index creation
@@ -84,8 +84,8 @@ smart-doctor-connect/
 ### 1\. Clone \& Install
 
 ```bash
-git clone https://github.com/your-username/smart-doctor-connect
-cd smart-doctor-connect
+git clone https://github.com/your-username/smart-doctor-connect-ai
+cd smart-doctor-connect-ai
 python -m venv venv
 source venv/bin/activate        # Windows: venv\\Scripts\\activate
 pip install -r requirements.txt
@@ -177,7 +177,7 @@ APScheduler==3.10.4
 
 ```python
 """
-Smart Doctor Connect AI — FastAPI Entry Point
+smart-doctor-connect-ai-AI — FastAPI Entry Point
 Handles app lifecycle, CORS, rate limiting, and router registration.
 """
 
@@ -215,7 +215,7 @@ async def lifespan(app: FastAPI):
 
 # ── App Factory ───────────────────────────────────────────────────────────────
 app = FastAPI(
-    title="Smart Doctor Connect AI",
+    title="smart-doctor-connect-ai-AI",
     description="AI-powered doctor discovery and appointment booking for Pakistan",
     version="1.0.0",
     lifespan=lifespan,
@@ -257,7 +257,7 @@ async def health\_check():
 
 ```python
 """
-Smart Doctor Connect AI — Pydantic Data Models
+smart-doctor-connect-ai-AI — Pydantic Data Models
 All request/response schemas live here. MongoDB \_id is handled via aliases.
 """
 
@@ -425,7 +425,7 @@ class AISearchResult(MongoBaseModel):
 
 ```python
 """
-Smart Doctor Connect AI — Doctors Router
+smart-doctor-connect-ai-AI — Doctors Router
 Endpoints: register, fetch, update, AI-powered search.
 The search pipeline: raw text → LLM/rule-based specialization → MongoDB query → scoring.
 """
@@ -645,7 +645,7 @@ async def list\_doctors(
 
 ```python
 """
-Smart Doctor Connect AI — Symptom Recommender Service
+smart-doctor-connect-ai-AI — Symptom Recommender Service
 Two-stage pipeline:
   1. LangChain LLM (Mistral-7B via OpenRouter) — rich, context-aware analysis
   2. Rule-based fallback (100+ symptom→specialization pairs) — always works
@@ -929,7 +929,7 @@ Respond exactly like this:
 
 ```python
 """
-Smart Doctor Connect AI — MongoDB Connection Manager
+smart-doctor-connect-ai-AI — MongoDB Connection Manager
 Uses Motor (async) driver. Indexes are created on startup.
 """
 
@@ -991,7 +991,7 @@ def get\_db() -> AsyncIOMotorDatabase:
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Smart Doctor Connect AI — Pakistan</title>
+  <title>smart-doctor-connect-ai-AI — Pakistan</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     /\* Custom Tailwind config inline \*/

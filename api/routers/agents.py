@@ -1,5 +1,5 @@
 """
-Smart Doctor Connect AI — Agentic Routing
+Smart-Doctor-Connect-AI — Agentic Routing
 """
 
 from __future__ import annotations
@@ -9,7 +9,7 @@ from fastapi import APIRouter, HTTPException
 from api.database import get_db
 from api.models import AgentMatchRequest, AgentMatchResponse
 from api.routers.chat import _score_doctor, _doc_to_response
-from api.services.recommender import SymptomRecommender
+from api.services.recommender import SymptomRecommender, normalize_specializations
 
 router = APIRouter(prefix="/agents", tags=["agents"])
 recommender = SymptomRecommender()
@@ -61,6 +61,9 @@ Respond ONLY in valid JSON format:
             specializations = ["General Physician"]
     else:
         specializations = ["General Physician"]
+    
+    # Normalize specialization names to match DB values
+    specializations = normalize_specializations(specializations)
         
     # Query MongoDB for these doctors
     import re

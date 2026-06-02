@@ -63,8 +63,8 @@ Patient Input → LangChain LLM (Mistral-7B via OpenRouter)
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/your-username/smart-doctor-connect.git
-cd smart-doctor-connect
+git clone https://github.com/your-username/smart-doctor-connect-ai.git
+cd smart-doctor-connect-ai
 python -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt

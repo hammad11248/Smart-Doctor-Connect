@@ -1,5 +1,5 @@
 """
-Smart Doctor Connect AI — Symptom Recommender Service
+Smart-Doctor-Connect-AI — Symptom Recommender Service
 Two-stage pipeline:
   1. LangChain LLM (Mistral-7B via OpenRouter) — rich, context-aware analysis
   2. Rule-based fallback (100+ symptom→specialization pairs) — always works
@@ -10,6 +10,85 @@ from __future__ import annotations
 import json
 import os
 from typing import Any, Dict, List
+
+# ── Specialization Synonym Map ────────────────────────────────────────────────
+# Maps common search terms / LLM output variants to the exact DB specialization values.
+SPECIALIZATION_SYNONYMS: Dict[str, str] = {
+    "cardiology": "Cardiologist",
+    "heart doctor": "Cardiologist",
+    "heart specialist": "Cardiologist",
+    "dermatology": "Dermatologist",
+    "skin doctor": "Dermatologist",
+    "skin specialist": "Dermatologist",
+    "pediatrics": "Pediatrician",
+    "child doctor": "Pediatrician",
+    "child specialist": "Pediatrician",
+    "orthopedics": "Orthopedic Surgeon",
+    "orthopedic": "Orthopedic Surgeon",
+    "bone doctor": "Orthopedic Surgeon",
+    "bone specialist": "Orthopedic Surgeon",
+    "gastroenterology": "Gastroenterologist",
+    "stomach doctor": "Gastroenterologist",
+    "neurology": "Neurologist",
+    "brain doctor": "Neurologist",
+    "brain specialist": "Neurologist",
+    "ent": "ENT Specialist",
+    "ear nose throat": "ENT Specialist",
+    "pulmonology": "Pulmonologist",
+    "lung doctor": "Pulmonologist",
+    "lung specialist": "Pulmonologist",
+    "chest specialist": "Pulmonologist",
+    "endocrinology": "Endocrinologist",
+    "diabetes doctor": "Endocrinologist",
+    "thyroid doctor": "Endocrinologist",
+    "urology": "Urologist",
+    "kidney doctor": "Nephrologist",
+    "nephrology": "Nephrologist",
+    "gynecology": "Gynecologist",
+    "women doctor": "Gynecologist",
+    "women specialist": "Gynecologist",
+    "obstetrics": "Gynecologist",
+    "ophthalmology": "Ophthalmologist",
+    "eye doctor": "Ophthalmologist",
+    "eye specialist": "Ophthalmologist",
+    "psychiatry": "Psychiatrist",
+    "mental health doctor": "Psychiatrist",
+    "psychology": "Psychologist",
+    "dentistry": "Dentist",
+    "dental": "Dentist",
+    "allergy": "Allergist",
+    "allergy doctor": "Allergist",
+    "rheumatology": "Rheumatologist",
+    "general medicine": "General Physician",
+    "general doctor": "General Physician",
+    "family doctor": "General Physician",
+    "gp": "General Physician",
+}
+
+
+def normalize_specializations(specs: list) -> list:
+    """Normalize specialization names using the synonym map."""
+    normalized = []
+    for spec in specs:
+        lower = spec.lower().strip()
+        # Check if it's a synonym
+        if lower in SPECIALIZATION_SYNONYMS:
+            canonical = SPECIALIZATION_SYNONYMS[lower]
+            if canonical not in normalized:
+                normalized.append(canonical)
+        else:
+            # Keep as-is but also try to match partial synonyms
+            matched = False
+            for synonym, canonical in SPECIALIZATION_SYNONYMS.items():
+                if synonym in lower or lower in synonym:
+                    if canonical not in normalized:
+                        normalized.append(canonical)
+                    matched = True
+                    break
+            if not matched and spec not in normalized:
+                normalized.append(spec)
+    return normalized
+
 
 # ── 100+ Rule-Based Symptom Map ───────────────────────────────────────────────
 SYMPTOM_MAP: Dict[str, List[str]] = {
@@ -173,17 +252,16 @@ class SymptomRecommender:
 
     def __init__(self):
         self._llm = None  # lazy-loaded
-        self._llm_available = True
 
     def _get_llm(self):
-        if not self._llm_available:
-            return None
+        """Return cached LLM instance, or create one. Returns None if API key missing."""
+        if self._llm is not None:
+            return self._llm
         try:
             from langchain_openai import ChatOpenAI  # noqa: PLC0415
 
             api_key = os.getenv("OPENROUTER_API_KEY")
             if not api_key:
-                self._llm_available = False
                 return None
 
             self._llm = ChatOpenAI(
@@ -195,7 +273,6 @@ class SymptomRecommender:
             )
             return self._llm
         except Exception:
-            self._llm_available = False
             return None
 
     # ── Rule-Based Fallback ───────────────────────────────────────────────────
@@ -354,9 +431,12 @@ Respond exactly like this:
             data = json.loads(raw)
             # Validate required keys
             assert "specializations" in data and "urgency" in data
+            # Normalize specialization names to match DB values
+            if "specializations" in data:
+                data["specializations"] = normalize_specializations(data["specializations"])
             return data
-        except Exception:
-            self._llm_available = False
+        except Exception as e:
+            print(f"[WARNING] LLM analysis failed (will retry next request): {e}")
             return None
 
     # ── Public API ────────────────────────────────────────────────────────────
@@ -365,4 +445,6 @@ Respond exactly like this:
         result = await self._llm_analyse(text)
         if result is None:
             result = self._rule_based(text)
+        # Always normalize specializations to match DB values
+        result["specializations"] = normalize_specializations(result.get("specializations", []))
         return result

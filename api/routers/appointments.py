@@ -1,5 +1,5 @@
 """
-Smart Doctor Connect AI — Appointments Router
+Smart-Doctor-Connect-AI — Appointments Router
 Endpoints: book appointment, get available slots, update status.
 Implements conflict-free booking via MongoDB unique index on (doctor_id, date, time_slot).
 """

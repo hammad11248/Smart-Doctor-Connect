@@ -1,5 +1,5 @@
 """
-Smart Doctor Connect AI — Pydantic Data Models
+Smart-Doctor-Connect-AI — Pydantic Data Models
 All request/response schemas live here. MongoDB _id is handled via aliases.
 """
 
@@ -64,7 +64,7 @@ class DoctorInDB(DoctorCreate):
     id: Optional[str] = Field(None, alias="_id")
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-    model_config = {"populate_by_name": True}
+    model_config = {"populate_by_name": True, "serialize_by_alias": True}
 
 
 class DoctorResponse(DoctorInDB):
@@ -142,7 +142,7 @@ class AppointmentInDB(AppointmentCreate):
     predicted_wait_minutes: Optional[int] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-    model_config = {"populate_by_name": True}
+    model_config = {"populate_by_name": True, "serialize_by_alias": True}
 
 
 class AppointmentStatusUpdate(MongoBaseModel):
@@ -163,7 +163,7 @@ class MessageInDB(MessageCreate):
     doctor_available: bool
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-    model_config = {"populate_by_name": True}
+    model_config = {"populate_by_name": True, "serialize_by_alias": True}
 
 
 class ChatMessageItem(BaseModel):

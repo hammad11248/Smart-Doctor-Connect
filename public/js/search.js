@@ -1,5 +1,5 @@
 /**
- * Smart Doctor Connect AI — Search Logic (search.js)
+ * Smart-Doctor-Connect-AI — Search Logic (search.js)
  * Handles AI-powered symptom search, result rendering, and analysis banner display.
  */
 
@@ -85,7 +85,8 @@ function renderSearchResults(data, isSearch = true) {
 
   data.doctors.forEach((doc) => {
     window.doctorCache = window.doctorCache || {};
-    window.doctorCache[doc._id] = doc.availability || {};
+    const docId = doc._id || doc.id || "";
+    window.doctorCache[docId] = doc.availability || {};
 
     const card = `
       <div class="tech-card" style="padding:1.25rem;display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;">
@@ -101,7 +102,7 @@ function renderSearchResults(data, isSearch = true) {
             </div>
           </div>
         </div>
-        <a href="/doctor-profile.html?id=${doc._id}&symptoms=${encodeURIComponent(document.getElementById('searchInput')?.value.trim() || '')}" class="btn btn-primary" style="white-space:nowrap;">Book Slot</a>
+        <a href="/doctor-profile.html?id=${docId}&symptoms=${encodeURIComponent(document.getElementById('searchInput')?.value.trim() || '')}" class="btn btn-primary" style="white-space:nowrap;">Book Slot</a>
       </div>
     `;
     container.insertAdjacentHTML("beforeend", card);

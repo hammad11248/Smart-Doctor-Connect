@@ -1,5 +1,5 @@
 """
-Smart Doctor Connect AI — FastAPI Entry Point
+Smart-Doctor-Connect-AI — FastAPI Entry Point
 Handles app lifecycle, CORS, rate limiting, and router registration.
 """
 
@@ -70,7 +70,7 @@ async def lifespan(app: FastAPI):
 # FastAPI App
 # ─────────────────────────────────────────────────────────────
 app = FastAPI(
-    title="Smart Doctor Connect AI",
+    title="Smart-Doctor-Connect-AI",
     description="AI-powered doctor discovery and appointment booking",
     version="1.0.0",
     lifespan=lifespan,

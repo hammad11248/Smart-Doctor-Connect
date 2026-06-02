@@ -1,5 +1,5 @@
 """
-Smart Doctor Connect AI — MongoDB Connection Manager & Mock Fallback
+Smart-Doctor-Connect-AI — MongoDB Connection Manager & Mock Fallback
 Uses Motor (async) driver. Indexes are created on startup.
 If the database connection is unavailable or unconfigured, it seamlessly
 falls back to a fully functional, in-memory Mock MongoDB to ensure 100% uptime.

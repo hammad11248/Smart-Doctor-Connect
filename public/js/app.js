@@ -1,5 +1,5 @@
 /**
- * Smart Doctor Connect AI — Shared Utilities (app.js)
+ * Smart-Doctor-Connect-AI — Shared Utilities (app.js)
  * Common functions used across all frontend pages:
  * - API base URL configuration
  * - XSS escaping

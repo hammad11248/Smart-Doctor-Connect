@@ -1,5 +1,5 @@
 """
-Smart Doctor Connect AI — Chat Router
+Smart-Doctor-Connect-AI — Chat Router
 Endpoints: send message (AI receptionist), get chat history.
 When a doctor is offline, the AI generates a response, stores the message,
 sends an email notification, and schedules a follow-up reminder.
@@ -271,7 +271,7 @@ async def triage_message(payload: TriageMessageCreate):
     ai_response = None
     llm = recommender._get_llm()
     if llm:
-        prompt = f"""You are a helpful Pakistani AI Medical Triage receptionist at Smart Doctor Connect.
+        prompt = f"""You are a helpful Pakistani AI Medical Triage receptionist at Smart-Doctor-Connect-AI.
 The patient {payload.patient_name} describes their symptoms: "{payload.message}"
 Our clinical rules determined:
 - Urgency: {urgency.value}

@@ -1,5 +1,5 @@
 """
-Smart Doctor Connect AI — Seed Data Script
+Smart-Doctor-Connect-AI — Seed Data Script
 Populates MongoDB with demo doctors across various specializations in Pakistani cities.
 Run: python seed_data.py
 """

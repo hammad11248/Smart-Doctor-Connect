@@ -1,5 +1,5 @@
 """
-Smart Doctor Connect AI — Doctors Router
+Smart-Doctor-Connect-AI — Doctors Router
 Endpoints: register, fetch, update, AI-powered search.
 The search pipeline: raw text → LLM/rule-based specialization → MongoDB query → scoring.
 """
@@ -24,7 +24,7 @@ from api.models import (
     DoctorUpdate,
     UrgencyLevel,
 )
-from api.services.recommender import SymptomRecommender
+from api.services.recommender import SymptomRecommender, normalize_specializations
 
 router = APIRouter()
 recommender = SymptomRecommender()   # singleton

@@ -1,5 +1,5 @@
 /**
- * Smart Doctor Connect AI — Booking Flow (booking.js)
+ * Smart-Doctor-Connect-AI — Booking Flow (booking.js)
  * Handles appointment booking modal, time slot management, and form submission.
  */
 

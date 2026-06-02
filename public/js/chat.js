@@ -1,5 +1,5 @@
 /**
- * Smart Doctor Connect AI — Real-time Chat Interface (chat.js)
+ * Smart-Doctor-Connect-AI — Real-time Chat Interface (chat.js)
  * Handles the virtual clinical intake coordinator on doctor profile pages.
  * Sends messages to the backend, displays assistant responses, and loads chat history.
  */
@@ -193,7 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ── Finish Chat and Summarize ───────────────────────────────────────────────
-async function finishChatAndSummarize() {
+async function finishChatAndSummarize(event) {
   if (!chatDoctorId) {
     showToast("No doctor selected.");
     return;
