@@ -41,6 +41,7 @@ class AIAgent:
                 model="mistralai/mistral-7b-instruct",
                 temperature=0.4,
                 max_tokens=512,
+                timeout=3.0,
             )
             return self._llm
         except Exception:

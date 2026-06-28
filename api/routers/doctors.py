@@ -46,12 +46,20 @@ def _detect_location(text: str) -> Optional[str]:
     return None
 
 
-def _score_doctor(doc: dict, specializations: List[str], location: Optional[str]) -> int:
+def _score_doctor(doc: dict, specializations: List[str], location: Optional[str], query: Optional[str] = None) -> int:
     """
     Compute a 0-100 match score.
-    Weights: specialization 50 | location 30 | availability 10 | rating 10
+    Weights: name boost | specialization 50 | location 30 | availability 10 | rating 10
     """
     score = 0
+
+    if query:
+        clean_query = query.lower().replace("dr.", "").replace("dr", "").strip()
+        clean_name = doc.get("name", "").lower().replace("dr.", "").replace("dr", "").strip()
+        # Full-word or exact substring name match boost
+        if clean_query and (clean_query in clean_name or clean_name in clean_query):
+            score += 60
+
     doc_spec = doc.get("specialization", "").lower()
 
     for spec in specializations:
@@ -122,12 +130,20 @@ async def search_doctors(
     detected_location = _detect_location(q)
 
     # ── Step 2: Build MongoDB query ───────────────────────────────────────────
-    # Use $or to match any of the recommended specializations (case-insensitive)
+    # Use $or to match either recommended specializations or doctor name
     spec_filters = [
         {"specialization": {"$regex": re.escape(s), "$options": "i"}}
         for s in specializations
     ]
-    mongo_query: dict = {"$or": spec_filters} if spec_filters else {}
+    
+    name_query = q.lower().replace("dr.", "").replace("dr", "").strip()
+    
+    or_filters = []
+    if name_query and len(name_query) >= 2:
+        or_filters.append({"name": {"$regex": re.escape(name_query), "$options": "i"}})
+    or_filters.extend(spec_filters)
+    
+    mongo_query: dict = {"$or": or_filters} if or_filters else {}
 
     if detected_location:
         mongo_query["location"] = {"$regex": re.escape(detected_location), "$options": "i"}
@@ -149,7 +165,7 @@ async def search_doctors(
 
     # ── Step 3: Score & rank ──────────────────────────────────────────────────
     scored = sorted(
-        [(_score_doctor(d, specializations, detected_location), d) for d in raw_docs],
+        [(_score_doctor(d, specializations, detected_location, q), d) for d in raw_docs],
         key=lambda x: x[0],
         reverse=True,
     )

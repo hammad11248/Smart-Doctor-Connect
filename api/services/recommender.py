@@ -14,6 +14,26 @@ from typing import Any, Dict, List
 # ── Specialization Synonym Map ────────────────────────────────────────────────
 # Maps common search terms / LLM output variants to the exact DB specialization values.
 SPECIALIZATION_SYNONYMS: Dict[str, str] = {
+    "cardiologist": "Cardiologist",
+    "dermatologist": "Dermatologist",
+    "pediatrician": "Pediatrician",
+    "orthopedic surgeon": "Orthopedic Surgeon",
+    "gastroenterologist": "Gastroenterologist",
+    "neurologist": "Neurologist",
+    "ent specialist": "ENT Specialist",
+    "pulmonologist": "Pulmonologist",
+    "endocrinologist": "Endocrinologist",
+    "urologist": "Urologist",
+    "nephrologist": "Nephrologist",
+    "gynecologist": "Gynecologist",
+    "ophthalmologist": "Ophthalmologist",
+    "psychiatrist": "Psychiatrist",
+    "psychologist": "Psychologist",
+    "dentist": "Dentist",
+    "allergist": "Allergist",
+    "rheumatologist": "Rheumatologist",
+    "general physician": "General Physician",
+    "physician": "General Physician",
     "cardiology": "Cardiologist",
     "heart doctor": "Cardiologist",
     "heart specialist": "Cardiologist",
@@ -80,7 +100,12 @@ def normalize_specializations(specs: list) -> list:
             # Keep as-is but also try to match partial synonyms
             matched = False
             for synonym, canonical in SPECIALIZATION_SYNONYMS.items():
-                if synonym in lower or lower in synonym:
+                if synonym in lower:
+                    if canonical not in normalized:
+                        normalized.append(canonical)
+                    matched = True
+                    break
+                elif lower in synonym and lower not in {"doctor", "specialist", "health", "medicine", "care"}:
                     if canonical not in normalized:
                         normalized.append(canonical)
                     matched = True
@@ -270,6 +295,7 @@ class SymptomRecommender:
                 model="mistralai/mistral-7b-instruct",
                 temperature=0.2,
                 max_tokens=512,
+                timeout=3.0,
             )
             return self._llm
         except Exception:
@@ -277,9 +303,21 @@ class SymptomRecommender:
 
     # ── Rule-Based Fallback ───────────────────────────────────────────────────
     def _rule_based(self, text: str) -> Dict[str, Any]:
-        lower = text.lower()
+        lower = text.lower().strip()
         matched_specs: List[str] = []
         urgency = "LOW"
+
+        # Check direct specialization or synonym matches first
+        if lower in SPECIALIZATION_SYNONYMS:
+            matched_specs.append(SPECIALIZATION_SYNONYMS[lower])
+        else:
+            for synonym, canonical in SPECIALIZATION_SYNONYMS.items():
+                if synonym in lower:
+                    if canonical not in matched_specs:
+                        matched_specs.append(canonical)
+                elif lower in synonym and len(lower) >= 4 and lower not in {"doctor", "specialist", "health", "medicine", "care"}:
+                    if canonical not in matched_specs:
+                        matched_specs.append(canonical)
 
         for keyword, specs in SYMPTOM_MAP.items():
             if keyword in lower:

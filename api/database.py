@@ -246,7 +246,9 @@ async def connect_db() -> None:
             await _db.doctors.create_index("is_available")
 
             await _db.appointments.create_index(
-                [("doctor_id", 1), ("date", 1), ("time_slot", 1)], unique=True
+                [("doctor_id", 1), ("date", 1), ("time_slot", 1)],
+                unique=True,
+                partialFilterExpression={"status": {"$in": ["confirmed", "pending"]}}
             )
             await _db.appointments.create_index("doctor_id")
             await _db.appointments.create_index("patient_email")

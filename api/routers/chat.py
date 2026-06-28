@@ -144,36 +144,33 @@ async def _schedule_followup(
 ) -> None:
     """
     Schedule a follow-up reminder 4 hours after the initial message.
-    Uses APScheduler for async job scheduling.
+    Uses the shared APScheduler singleton.
     If APScheduler is unavailable, logs and skips gracefully.
     """
     try:
-        from apscheduler.schedulers.asyncio import AsyncIOScheduler
         from apscheduler.triggers.date import DateTrigger
+        from api.services.scheduler import scheduler
 
-        scheduler = AsyncIOScheduler()
-        run_time = datetime.now(timezone.utc) + timedelta(hours=4)
+        if scheduler and hasattr(scheduler, "add_job"):
+            run_time = datetime.now(timezone.utc) + timedelta(hours=4)
 
-        scheduler.add_job(
-            send_followup_reminder,
-            trigger=DateTrigger(run_date=run_time),
-            kwargs={
-                "patient_email": patient_contact or "",
-                "patient_name": patient_name,
-                "doctor_name": doctor_name,
-                "original_message": original_message,
-            },
-            id=f"followup_{patient_name}_{datetime.now(timezone.utc).timestamp()}",
-            replace_existing=True,
-        )
+            scheduler.add_job(
+                send_followup_reminder,
+                trigger=DateTrigger(run_date=run_time),
+                kwargs={
+                    "patient_email": patient_contact or "",
+                    "patient_name": patient_name,
+                    "doctor_name": doctor_name,
+                    "original_message": original_message,
+                },
+                id=f"followup_{patient_name}_{datetime.now(timezone.utc).timestamp()}",
+                replace_existing=True,
+            )
 
-        if not scheduler.running:
-            scheduler.start()
-
-        print(
-            f"[SCHEDULER] Follow-up reminder scheduled for {patient_name} "
-            f"regarding {doctor_name} at {run_time.isoformat()}"
-        )
+            print(
+                f"[SCHEDULER] Follow-up reminder scheduled for {patient_name} "
+                f"regarding {doctor_name} at {run_time.isoformat()}"
+            )
     except Exception as e:
         print(f"[WARNING] Could not schedule follow-up (non-critical): {e}")
 
@@ -364,7 +361,7 @@ Provide your analysis strictly in the following JSON format:
     # 3. Find latest appointment for this patient and doctor
     cursor = db.appointments.find({
         "doctor_id": payload.doctor_id,
-        "patient_name": {"$regex": re.compile(f"^{re.escape(payload.patient_name)}$", re.IGNORECASE)}
+        "patient_name": {"$regex": f"^{re.escape(payload.patient_name)}$", "$options": "i"}
     }).sort("created_at", -1).limit(1)
     
     appts = await cursor.to_list(length=1)

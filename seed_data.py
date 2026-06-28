@@ -404,6 +404,11 @@ async def seed():
     if existing > 0:
         print(f"[WARNING] Found {existing} existing doctors. Clearing collection...")
         await db.doctors.delete_many({})
+    
+    await db.appointments.delete_many({})
+    await db.messages.delete_many({})
+    await db.email_logs.delete_many({})
+    print("[SUCCESS] Cleared appointments, messages, and email logs.")
 
     # Insert demo data
     result = await db.doctors.insert_many(DEMO_DOCTORS)
@@ -423,6 +428,22 @@ async def seed():
     await db.doctors.create_index("specialization")
     await db.doctors.create_index("location")
     await db.doctors.create_index("is_available")
+
+    try:
+        await db.appointments.drop_indexes()
+    except Exception:
+        pass
+
+    await db.appointments.create_index(
+        [("doctor_id", 1), ("date", 1), ("time_slot", 1)],
+        unique=True,
+        partialFilterExpression={"status": {"$in": ["confirmed", "pending"]}}
+    )
+    await db.appointments.create_index("doctor_id")
+    await db.appointments.create_index("patient_email")
+
+    await db.messages.create_index("doctor_id")
+    await db.messages.create_index("created_at")
     print("\n[SUCCESS] Database indexes created.")
 
     client.close()
